@@ -449,3 +449,16 @@ main#home{padding-top:0}
 .brand-gem{font-size:28px;color:#e4c58e;line-height:1}
 @media(max-width:520px){.receipt-metadata{gap:14px}.lookup-search,.lookup-receipt{padding:22px 17px}.receipt-line strong{font-size:12px}}
 @media print{.site-header,.lookup-heading,.lookup-search,.lookup-recent,.lookup-print,footer{display:none!important}.lookup-page{padding:0;background:#fff}.lookup-receipt{display:block!important;box-shadow:none;border:1px solid #aaa;margin:0}}
+
+
+/* V1.3.47: Equipment preset choices. Three columns, two choices for crafters/gatherers. */
+.equipment-name-field{display:grid;gap:9px;min-width:0}
+.equipment-name-title{font-size:13px;font-weight:600;color:#463d31}
+.equipment-name-title span{color:#a64b35}
+.equipment-name-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.equipment-name-choice{min-width:0;min-height:48px;padding:10px 8px;border:1px solid #cdb994;border-radius:6px;background:#fffaf1;color:#173d65;font:600 13px/1.45 'Noto Sans TC',sans-serif;text-align:center;cursor:pointer;transition:background .15s,border-color .15s,box-shadow .15s}
+.equipment-name-choice:hover{background:#f1e2c8;border-color:#ae8550}
+.equipment-name-choice[aria-pressed="true"]{background:#164a7d;border-color:#164a7d;color:#fff9ed;box-shadow:0 0 0 2px #164a7d25}
+.equipment-name-choice:focus-visible{outline:3px solid #c5a16a;outline-offset:2px}
+.equipment-name-hint{font-size:12px;line-height:1.65;color:#75695b;margin:0}
+@media(max-width:480px){.equipment-name-options{gap:6px}.equipment-name-choice{font-size:11px;padding:9px 5px;min-height:50px}}

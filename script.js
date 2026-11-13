@@ -22,10 +22,28 @@ const equipmentJobs={
   {group:'採集職業',role:'gather',jobs:[['MIN','採礦工'],['BTN','園藝工'],['FSH','捕魚人']]}
  ]
 };
-let selectedEquipmentType='';let selectedEquipmentJob=null;
+const equipmentNameOptions={
+ '戰鬥裝備':['典禮套裝（740）','宮廷愛人（770/7.4）','其他'],
+ '製作採集':['雀翎套裝（750/7.3）','其他']
+};
+let selectedEquipmentType='';let selectedEquipmentJob=null;let selectedEquipmentName='';
+function renderEquipmentNameOptions(){
+ const holder=$('equipment-name-options');
+ if(!holder)return;
+ selectedEquipmentName='';
+ holder.innerHTML=(equipmentNameOptions[selectedEquipmentType]||[]).map(name=>`<button type="button" class="equipment-name-choice" data-equipment-name="${safe(name)}" aria-pressed="false">${safe(name)}</button>`).join('');
+ holder.querySelectorAll('button').forEach(button=>button.addEventListener('click',()=>{
+  selectedEquipmentName=button.dataset.equipmentName;
+  holder.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+  $('equipment-name-hint').textContent=selectedEquipmentName==='其他'?'請在下方「訂製需求」中註明具體裝備名稱、等級及特殊要求。':`已選擇：${selectedEquipmentName}`;
+  $('equipment-status').textContent='';
+ }));
+ $('equipment-name-hint').textContent='請選擇裝備名稱；選擇「其他」時，請在下方訂製需求中註明品項。';
+}
+
 function chooseEquipmentType(type){
  if(!equipmentJobs[type])return;
- selectedEquipmentType=type; selectedEquipmentJob=null;
+ selectedEquipmentType=type; selectedEquipmentJob=null;renderEquipmentNameOptions();
  document.querySelectorAll('[data-equipment-type]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.equipmentType===type)));
  $('equipment-job-step').hidden=false;$('equipment-form').hidden=true;
  $('equipment-job-hint').textContent=`已選擇「${type}」，請再選擇要訂製的職業。`;
@@ -46,21 +64,21 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
  const navCustom=$('nav-open-custom');if(navCustom)navCustom.addEventListener('click',e=>{e.preventDefault();selectCategory('客製化委託');location.hash='commission';});
  $('custom-form').addEventListener('submit',e=>{e.preventDefault();const name=$('custom-name').value.trim()||'客製化委託';const detail=$('custom-detail').value.trim();const status=$('custom-status');if(detail.length<5){status.textContent='請至少填寫 5 個字的製作需求。';status.className='custom-status error';$('custom-detail').focus();return;}custom.push({name,detail});$('custom-form').reset();status.textContent='已加入右側訂購申請單，可繼續填寫其他委託。';status.className='custom-status success';renderCart();});
  document.querySelectorAll('[data-equipment-type]').forEach(b=>b.addEventListener('click',()=>chooseEquipmentType(b.dataset.equipmentType)));
- $('equipment-back-type').addEventListener('click',()=>{selectedEquipmentType='';selectedEquipmentJob=null;$('equipment-job-step').hidden=true;$('equipment-form').hidden=true;document.querySelectorAll('[data-equipment-type]').forEach(b=>b.setAttribute('aria-pressed','false'));});
+ $('equipment-back-type').addEventListener('click',()=>{selectedEquipmentType='';selectedEquipmentJob=null;selectedEquipmentName='';$('equipment-name-options').innerHTML='';$('equipment-job-step').hidden=true;$('equipment-form').hidden=true;document.querySelectorAll('[data-equipment-type]').forEach(b=>b.setAttribute('aria-pressed','false'));});
  $('equipment-back-job').addEventListener('click',()=>{selectedEquipmentJob=null;$('equipment-form').hidden=true;document.querySelectorAll('.equipment-job-btn').forEach(b=>b.setAttribute('aria-pressed','false'));});
  $('equipment-form').addEventListener('submit',e=>{
   e.preventDefault();
-  const name=$('equipment-name').value.trim();
+  const name=selectedEquipmentName;
   if(!selectedEquipmentType||!selectedEquipmentJob)return;
   const qty=Number($('equipment-qty').value);
   const details=$('equipment-details').value.trim();
   const status=$('equipment-status');
   if(!name||!Number.isInteger(qty)||qty<1||qty>99||details.length<5){
-   status.textContent='請填寫裝備名稱、1–99 的訂製數量，以及至少 5 個字的需求說明。';
+   status.textContent='請選擇裝備名稱、填寫 1–99 的訂製數量，以及至少 5 個字的需求說明。';
    status.className='custom-status error';return;
   }
   custom.push({name:'【裝備訂製】'+name,detail:`大類：${selectedEquipmentType}\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n數量：${qty} 件\n${details}`,type:'裝備訂製',equipmentType:selectedEquipmentType,equipmentJob:selectedEquipmentJob.name,quantity:qty});
-  $('equipment-form').reset();status.textContent='裝備訂製已加入右側申請單，待店主報價。';status.className='custom-status success';renderCart();
+  $('equipment-form').reset();selectedEquipmentName='';renderEquipmentNameOptions();status.textContent='裝備訂製已加入右側申請單，待店主報價。';status.className='custom-status success';renderCart();
  });
  $('checkout-form').addEventListener('submit',submitOrder);initializePendingRecovery();if(location.hash==='#commission')currentCategory='客製化委託';renderFilters();renderProducts();renderCart();}
 function categories(){return shopTabs;}
