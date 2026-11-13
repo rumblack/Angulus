@@ -3,14 +3,24 @@ window.SHOP_CONFIG = {
   name: 'Angulus',
   englishName: 'Angulus',
   tagline: '遊戲道具製作小舖',
-  notice: '本店使用 FF14 遊戲內 Gil 計價。下單後由店主確認庫存、製作時間與交付方式。',
+  notice: '本店所有商品皆以 FF14 遊戲內貨幣 Gil 計價。訂單送出後，店主將依實際庫存與製作安排確認所需時間，並與您協調交付方式及時段，請以最終回覆為準。',
   contactLabel: 'Discord 聯絡店主',
   contactUrl: '', // 例如 https://discord.gg/你的邀請連結 ，留空則隱藏
   formEndpoint: '', // 在 Formspree 建立表單後填入 https://formspree.io/f/xxxxxxxx ，空白時不能線上送單
   products: [
-    { id:'chair', name:'華麗書房椅', category:'傢俱', price:250000, days:'2–3 日', badge:'推薦', desc:'為你的居所增添精緻的古典氣息。' },
-    { id:'bookshelf', name:'書架組合（大型）', category:'傢俱', price:800000, days:'3–5 日', badge:'熱門', desc:'帶有沉穩木色的典藏書房陳設。' },
-    { id:'lamp', name:'寶石燈飾', category:'燈具', price:320000, days:'2–4 日', badge:'可客製', desc:'藍色寶石與金屬細節相襯。' },
+    { id:'mountain-tea-999', name:'高山茶一組', category:'常駐商品', price:329000, days:'依店主確認', badge:'常駐', desc:'一組共 999 杯高山茶。前往舊薩雷安時，不妨多備一些——說不定當地的人們正需要這份暖心茶香。' },
+    { id:'mate-cookies-99', name:'高級瑪黛茶餅乾', category:'常駐商品', price:69000, days:'依店主確認', badge:'常駐', desc:'一份共 99 塊高級瑪黛茶餅乾，香甜酥脆，是陪伴你踏上旅途、探索未知的最佳良伴。' },
+    { id:'grade3-strength-potion-99', name:'3級剛力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'一組共 99 瓶。蘊含強化力量的藥效，為奮戰在前線的冒險者增添一份助力。' },
+    { id:'grade3-intelligence-potion-99', name:'3級智力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'一組共 99 瓶。能夠提升智力的寶藥，為施展法術與迎接挑戰做好準備。' },
+    { id:'grade3-mind-potion-99', name:'3級意力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'一組共 99 瓶。能夠提升精神與意力，為守護同伴的旅途增添一份安心。' },
+    { id:'grade3-dexterity-potion-99', name:'3級巧力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'一組共 99 瓶。蘊含提升靈巧的藥效，讓每一次出手更加俐落，陪伴冒險者從容迎接挑戰。' },
+    // 少量購買：複製常駐商品（高山茶除外），每份為 10 塊／10 瓶。
+    // 少量購買價格：餅乾每份 6,000 Gil；四種寶藥每組 13,000 Gil。
+    { id:'mate-cookies-10', name:'高級瑪黛茶餅乾', category:'少量購買', price:6000, days:'依店主確認', badge:'少量', desc:'一份共 10 塊高級瑪黛茶餅乾，香甜酥脆，是陪伴你踏上旅途、探索未知的最佳良伴。' },
+    { id:'grade3-strength-potion-10', name:'3級剛力之寶藥', category:'少量購買', price:13000, days:'依店主確認', badge:'少量', desc:'一組共 10 瓶。蘊含強化力量的藥效，為奮戰在前線的冒險者增添一份助力。' },
+    { id:'grade3-intelligence-potion-10', name:'3級智力之寶藥', category:'少量購買', price:13000, days:'依店主確認', badge:'少量', desc:'一組共 10 瓶。能夠提升智力的寶藥，為施展法術與迎接挑戰做好準備。' },
+    { id:'grade3-mind-potion-10', name:'3級意力之寶藥', category:'少量購買', price:13000, days:'依店主確認', badge:'少量', desc:'一組共 10 瓶。能夠提升精神與意力，為守護同伴的旅途增添一份安心。' },
+    { id:'grade3-dexterity-potion-10', name:'3級巧力之寶藥', category:'少量購買', price:13000, days:'依店主確認', badge:'少量', desc:'一組共 10 瓶。蘊含提升靈巧的藥效，讓每一次出手更加俐落，陪伴冒險者從容迎接挑戰。' },
     { id:'custom', name:'專屬客製委託', category:'客製委託', price:null, days:'依需求報價', badge:'待報價', desc:'請描述想製作的道具、數量與期望交期。' }
   ]
 };
