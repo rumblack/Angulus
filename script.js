@@ -62,7 +62,7 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
   custom.push({name:'【裝備訂製】'+name,detail:`大類：${selectedEquipmentType}\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n數量：${qty} 件\n${details}`,type:'裝備訂製',equipmentType:selectedEquipmentType,equipmentJob:selectedEquipmentJob.name,quantity:qty});
   $('equipment-form').reset();status.textContent='裝備訂製已加入右側申請單，待店主報價。';status.className='custom-status success';renderCart();
  });
- $('checkout-form').addEventListener('submit',submitOrder);if(location.hash==='#commission')currentCategory='客製化委託';renderFilters();renderProducts();renderCart();}
+ $('checkout-form').addEventListener('submit',submitOrder);initializePendingRecovery();if(location.hash==='#commission')currentCategory='客製化委託';renderFilters();renderProducts();renderCart();}
 function categories(){return shopTabs;}
 function categoryOf(p){if(p.price===null)return '客製化委託';const c=p.shopCategory||p.category;return shopTabs.includes(c)?c:'常駐商品';}
 function selectCategory(c){if(!shopTabs.includes(c))return;currentCategory=c;renderFilters();renderProducts();}
@@ -91,5 +91,88 @@ function renderCart(){const entries=products.filter(p=>cart[p.id]>0&&p.price!==n
  $('cart-items').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const a=b.dataset.action;if(a==='remove-custom'){custom.splice(Number(b.dataset.index),1);}else{const id=b.dataset.id;cart[id]=Math.max(0,Math.min(99,(cart[id]||0)+(a==='plus'?1:-1)));if(!cart[id])delete cart[id];save();}renderCart();renderProducts();}));$('cart-total').textContent=money(entries.reduce((n,p)=>n+p.price*cart[p.id],0));$('quote-note').hidden=!custom.length;}
 function orderData(){const fd=new FormData($('checkout-form'));const chosen=products.filter(p=>cart[p.id]>0&&p.price!==null);const items=chosen.map(p=>({id:p.id,name:p.name,unit_price:p.price,qty:cart[p.id],subtotal:p.price*cart[p.id]}));const total=items.reduce((v,p)=>v+p.subtotal,0);return {shop:config.name||'Angulus',character:String(fd.get('character')||'').trim(),server:String(fd.get('server')||'').trim(),contact:String(fd.get('contact')||'').trim(),deliveryDate:String(fd.get('deliveryDate')||''),deliveryTime:String(fd.get('deliveryTime')||'').trim(),notes:String(fd.get('notes')||'').trim(),items,custom,estimated_gil:total,requires_quote:custom.length>0,created_at:new Date().toISOString()};}
 function orderText(d){return [`【${d.shop}】訂購申請`,`角色名稱：${d.character}`,`伺服器：${d.server}`,`聯絡方式：${d.contact}`,`希望交貨：${d.deliveryDate||'未填寫'}`,`方便時段：${d.deliveryTime||'未填寫'}`,'','【固定商品】',...d.items.map(p=>`${p.name} × ${p.qty}｜${money(p.subtotal)}`),'',`訂單小記：${money(d.estimated_gil)}`,...(d.requires_quote?['＊另含客製委託，總額待報價。']:[]),'','【客製委託】',...(d.custom.map((x,i)=>`${i+1}. ${x.name}\n${x.detail}`)),'','備註：'+(d.notes||'無'),'申請時間：'+d.created_at].join('\n');}
-async function submitOrder(e){e.preventDefault();const s=$('form-status');s.className='form-status';if(!Object.keys(cart).length&&!custom.length){s.textContent='請先選擇商品或填寫客製委託。';s.classList.add('error');return;}const endpoint=String(config.formEndpoint||'').trim();if(!/^https:\/\/formspree\.io\/f\/[a-zA-Z0-9]+$/.test(endpoint)){s.classList.add('error');s.textContent='店主尚未設定線上收單服務，現階段無法送出。請聯絡店主；亦可先截圖訂單內容。';return;}const d=orderData();const button=$('submit-order');button.disabled=true;button.textContent='正在傳送訂單…';try{const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:d.character,email:d.contact.includes('@')?d.contact:undefined,character:d.character,server:d.server,contact:d.contact,deliveryDate:d.deliveryDate,deliveryTime:d.deliveryTime,message:orderText(d),order_json:JSON.stringify(d)})});if(!r.ok)throw Error('伺服器未接受此訂單（HTTP '+r.status+'）');s.textContent='訂單申請已傳送！請保留聯絡資訊並等候店主回覆。';cart={};custom=[];save();renderCart();renderProducts();$('checkout-form').reset();}catch(err){s.classList.add('error');s.textContent='送單失敗：'+err.message+'。商品仍留在訂購單中，請稍後再試。';}finally{button.disabled=false;button.textContent='送出訂購申請';}}
+async function submitOrderFormspree(e){e.preventDefault();const s=$('form-status');s.className='form-status';if(!Object.keys(cart).length&&!custom.length){s.textContent='請先選擇商品或填寫客製委託。';s.classList.add('error');return;}const endpoint=String(config.formEndpoint||'').trim();if(!/^https:\/\/formspree\.io\/f\/[a-zA-Z0-9]+$/.test(endpoint)){s.classList.add('error');s.textContent='店主尚未設定線上收單服務，現階段無法送出。請聯絡店主；亦可先截圖訂單內容。';return;}const d=orderData();const button=$('submit-order');button.disabled=true;button.textContent='正在傳送訂單…';try{const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:d.character,email:d.contact.includes('@')?d.contact:undefined,character:d.character,server:d.server,contact:d.contact,deliveryDate:d.deliveryDate,deliveryTime:d.deliveryTime,message:orderText(d),order_json:JSON.stringify(d)})});if(!r.ok)throw Error('伺服器未接受此訂單（HTTP '+r.status+'）');s.textContent='訂單申請已傳送！請保留聯絡資訊並等候店主回覆。';cart={};custom=[];save();renderCart();renderProducts();$('checkout-form').reset();}catch(err){s.classList.add('error');s.textContent='送單失敗：'+err.message+'。商品仍留在訂購單中，請稍後再試。';}finally{button.disabled=false;button.textContent='送出訂購申請';}}
 document.addEventListener('DOMContentLoaded',setup);
+
+
+// V1.3.42: GitHub Pages -> Apps Script via HTML form POST and a receipt-only JSONP query.
+// Direct fetch() POST to Apps Script from Pages often fails due to cross-origin redirects.
+// Do not infer delivery from iframe load; only a receipt found in the private Sheet confirms success.
+const receiptKey='angulus-last-uncertain-order';
+let googleSubmitting=false;
+function receiptStore(value){try{if(value)localStorage.setItem(receiptKey,JSON.stringify(value));else localStorage.removeItem(receiptKey);}catch(_){}}
+function randomRequestId(){
+ if(!window.crypto||!crypto.getRandomValues)throw Error('瀏覽器不支援安全訂單識別碼，請改用現代瀏覽器。');
+ const b=new Uint8Array(20);crypto.getRandomValues(b);return Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');
+}
+function lookupReceipt(url,requestId,timeoutMs=11000){
+ return new Promise((resolve,reject)=>{
+  const callback='angulusReceipt_'+Math.random().toString(36).slice(2);
+  const tag=document.createElement('script');let finished=false;
+  const timer=setTimeout(()=>finish(new Error('查詢逾時')),timeoutMs);
+  function finish(error,value){if(finished)return;finished=true;clearTimeout(timer);delete window[callback];tag.remove();error?reject(error):resolve(value);}
+  window[callback]=result=>finish(null,result);
+  tag.onerror=()=>finish(new Error('無法連線到 Google 訂單回執服務'));
+  tag.src=url+(url.includes('?')?'&':'?')+'action=receipt&requestId='+encodeURIComponent(requestId)+'&callback='+encodeURIComponent(callback)+'&v='+Date.now();
+  document.head.appendChild(tag);
+ });
+}
+const sleep=ms=>new Promise(done=>setTimeout(done,ms));
+async function confirmReceipt(url,requestId){
+ for(let attempt=0;attempt<7;attempt++){
+  await sleep(attempt===0?2100:2400);
+  try{const v=await lookupReceipt(url,requestId,8500);if(v&&v.found&&v.orderId)return v;}catch(e){}
+ }
+ return null;
+}
+function postToAppsScript(url,body){
+ const frame=$('angulus-submit-frame');
+ if(!frame)throw Error('找不到訂單傳送框架');
+ const form=document.createElement('form');form.method='POST';form.action=url;form.target=frame.name;form.style.display='none';
+ Object.entries(body).forEach(([key,value])=>{const input=document.createElement('input');input.type='hidden';input.name=key;input.value=String(value);form.appendChild(input);});
+ document.body.appendChild(form);try{form.submit();}finally{form.remove();}
+}
+function refreshPendingActions(){const p=$('pending-actions');if(p)p.hidden=!loadPending();}
+function loadPending(){try{const d=JSON.parse(localStorage.getItem(receiptKey)||'null');return d&&d.requestId?d:null;}catch(_){return null;}}
+function initializePendingRecovery(){
+ const check=$('check-pending'),clear=$('clear-pending');if(!check||!clear)return;refreshPendingActions();
+ check.addEventListener('click',async()=>{const pending=loadPending();if(!pending)return;const url=String(config.googleScriptUrl||'');const s=$('form-status');s.textContent='正在核對上一筆訂單…';try{const found=await lookupReceipt(url,pending.requestId);if(found&&found.found){finishConfirmedOrder(found);s.textContent='上一筆訂單已確認：'+found.orderId+'。';}else{s.className='form-status error';s.textContent='Google 尚未找到這筆訂單；請在店主核對後決定是否重新提交。';}}catch(e){s.className='form-status error';s.textContent='查詢未成功，請聯絡店主核對。';}});
+ clear.addEventListener('click',()=>{const p=loadPending();if(!p)return;if(!window.confirm('請先確認 Google 試算表中沒有這筆訂單。若已入帳而再次送出，可能產生重複訂單。確定放棄這筆未確認識別碼嗎？'))return;receiptStore(null);refreshPendingActions();$('form-status').textContent='已清除未確認紀錄，原本購物車保留。';});
+}
+function finishConfirmedOrder(result){
+ cart={};custom=[];save();renderCart();renderProducts();$('checkout-form').reset();
+ const s=$('form-status');s.className='form-status';s.textContent='訂單已成功建立！訂單編號：'+result.orderId+'。請保存編號，並等候店主確認。';
+ $('receipt-message').hidden=false;$('receipt-message').textContent='您的訂單編號：'+result.orderId;
+ receiptStore(null);refreshPendingActions();
+}
+async function submitOrderGoogle(e){
+ e.preventDefault();const status=$('form-status');status.className='form-status';
+ if(googleSubmitting)return;
+ if(!Object.keys(cart).length&&!custom.length){status.textContent='請先選擇商品或填寫委託。';status.classList.add('error');return;}
+ const url=String(config.googleScriptUrl||'').trim();
+ if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url)){
+  status.textContent='店主尚未完成 Google 訂單接收設定，無法送出。請聯絡店主。';status.classList.add('error');return;
+ }
+ const uncertain=(()=>{try{return JSON.parse(localStorage.getItem(receiptKey)||'null');}catch(_){return null;}})();
+ if(uncertain&&uncertain.requestId){
+  status.classList.add('error');status.textContent='上一筆訂單尚未確認接收，請先使用原訂單識別碼查詢或聯絡店主，避免重複下單。';return;
+ }
+ const button=$('submit-order');googleSubmitting=true;button.disabled=true;button.textContent='正在確認訂單…';
+ try{
+  const requestId=randomRequestId();const payload=orderData();
+  const body={payload:JSON.stringify(payload),requestId,website:'angulus',trap:''};
+  if(body.payload.length>22000)throw Error('委託內容過長，請縮短備註或分開下單。');
+  receiptStore({requestId,createdAt:Date.now()});refreshPendingActions();
+  postToAppsScript(url,body);
+  status.textContent='訂單已送出，正在向 Google 試算表確認收件結果，請勿關閉頁面或重複送單。';
+  const confirmed=await confirmReceipt(url,requestId);
+  if(confirmed){finishConfirmedOrder(confirmed);}else{
+   status.classList.add('error');status.textContent='尚未收到 Google 訂單確認。請勿立刻重送；請向店主提供查詢識別碼 '+requestId+' 核對是否已入帳。您的購物車仍保留。';
+  }
+ }catch(err){status.classList.add('error');status.textContent='送單未確認：'+err.message+'。請先聯絡店主核對再重新送出。';}
+ finally{googleSubmitting=false;button.disabled=false;button.textContent='送出訂購申請';}
+}
+function submitOrder(e){
+ if(config.orderBackend==='formspree')return submitOrderFormspree(e);
+ return submitOrderGoogle(e);
+}

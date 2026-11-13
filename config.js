@@ -6,6 +6,8 @@ window.SHOP_CONFIG = {
   notice: '本店所有商品皆以 FF14 遊戲內貨幣 Gil 計價。訂單送出後，店主將依實際庫存與製作安排確認所需時間，並與您協調交付方式及時段，請以最終回覆為準。',
   contactLabel: 'Discord 聯絡店主',
   contactUrl: '', // 例如 https://discord.gg/你的邀請連結 ，留空則隱藏
+  googleScriptUrl: 'https://script.google.com/macros/s/AKfycbw9wIt64Onps7LeJGWG2ccVwRzA3BrX2bnSW6ydkGC_OrGfbeqHMU8Db1abA--dNGwS/exec', // 貼上 Apps Script 網頁應用程式 /exec 網址，啟用 Google 試算表接單
+  orderBackend: 'google', // google: Google Sheets；formspree: 原有備援
   formEndpoint: 'https://formspree.io/f/xbgodgak', // 在 Formspree 建立表單後填入 https://formspree.io/f/xxxxxxxx ，空白時不能線上送單
   products: [
     { id:'mountain-tea-999', name:'高山茶一組', category:'常駐商品', price:329000, days:'依店主確認', badge:'常駐', desc:'一組共 999 杯高山茶。前往舊薩雷安時，不妨多備一些——說不定當地的人們正需要這份暖心茶香。' },

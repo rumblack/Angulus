@@ -395,3 +395,8 @@ main#home{padding-top:0}
   .equipment-type-btn .equipment-type-identity strong{font-size:14px}
   .equipment-type-btn .equipment-type-description{font-size:11px}
 }
+
+/* V1.3.42 Google 訂單收據資訊 */
+.receipt-message{margin:10px 0 0;padding:11px;border:1px solid #be9f6c;border-radius:5px;color:#153e66;background:#fff5da;font-weight:700;overflow-wrap:anywhere}
+
+.pending-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}.pending-actions[hidden]{display:none!important}.pending-actions .btn{font-size:12px;padding:7px 10px}
