@@ -22,3 +22,25 @@
 footer{background:linear-gradient(100deg,#2b211e,#473126,#2d211c)}
 @media(max-width:760px){.hero-inner{grid-template-columns:1fr;gap:0}.hero-text-panel{margin:0 5px 32px;padding:25px 22px}.hero-copy{padding-bottom:24px}.commission-text{padding:24px 20px}}
 @media(max-width:390px){.product-card{padding:14px 8px}.product-info p{min-height:62px}}
+
+/* V1.3.1：訂購申請單數量控制器。固定正方形按鈕、置中數字與一致間距。 */
+.cart-line{align-items:flex-start;min-width:0}
+.cart-line>div:first-child{min-width:0;flex:1}
+.cart-line .cart-action{flex:0 0 auto;min-width:122px;text-align:right}
+.cart-line .cart-action>strong{white-space:nowrap}
+.cart-line .quantity-control{display:grid;grid-template-columns:30px 32px 30px;column-gap:7px;align-items:center;justify-content:end;margin-top:8px}
+.cart-line .quantity-control .quantity-btn{appearance:none;display:flex;align-items:center;justify-content:center;width:30px;height:30px;min-width:30px;min-height:30px;box-sizing:border-box;padding:0;margin:0;border:1px solid #b99b72;border-radius:5px;background:#fffbef;color:#4b392b;font:500 19px/1 Arial,sans-serif;cursor:pointer}
+.cart-line .quantity-control .quantity-btn:hover{background:#e8d8b9;border-color:#886b48}
+.cart-line .quantity-control .quantity-btn:focus-visible{outline:2px solid #164a7d;outline-offset:2px}
+.cart-line .quantity-control .quantity-value{display:flex;align-items:center;justify-content:center;min-width:32px;min-height:30px;text-align:center;font:600 14px/1.2 'Noto Sans TC',sans-serif;font-variant-numeric:tabular-nums;color:#453b2d}
+@media(max-width:390px){.cart-line .cart-action{min-width:108px}.cart-line .quantity-control{grid-template-columns:28px 26px 28px;column-gap:6px}.cart-line .quantity-control .quantity-btn{width:28px;height:28px;min-width:28px;min-height:28px}.cart-line .quantity-control .quantity-value{min-width:26px;min-height:28px}}
+
+/* V1.3.2: Angulus compact single-column hero; right introduction removed. */
+.hero-inner{display:block;min-height:0;max-width:1220px}
+.hero-copy{padding:36px 0 38px;max-width:780px}
+.hero h1{font-size:clamp(32px,3.25vw,47px);line-height:1.3;margin:10px 0 4px}
+.hero-english{font-size:17px;margin:0 0 9px}
+.hero-copy>p:not(.hero-english){font-size:14px;line-height:1.7;margin:12px 0}
+.hero-actions{margin-top:16px}
+.eyebrow{font-size:12px}
+@media(max-width:760px){.hero-inner{display:block}.hero-copy{padding:30px 0 32px;max-width:none}.hero h1{font-size:clamp(31px,7vw,40px)}.hero-actions{gap:9px}.hero-actions .btn{padding:10px 14px}}

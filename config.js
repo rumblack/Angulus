@@ -1,7 +1,7 @@
 /* 店主可編輯設定：請勿在此放密碼或私人 API 金鑰。 */
 window.SHOP_CONFIG = {
-  name: '星藍工坊',
-  englishName: 'Sapphire Atelier',
+  name: 'Angulus',
+  englishName: 'Angulus',
   tagline: '遊戲道具製作小舖',
   notice: '本店使用 FF14 遊戲內 Gil 計價。下單後由店主確認庫存、製作時間與交付方式。',
   contactLabel: 'Discord 聯絡店主',
