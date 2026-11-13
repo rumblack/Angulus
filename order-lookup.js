@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const character=q('lookup-character').value.trim();const code=q('lookup-code').value.trim().toLowerCase();
   if(!character||!/^[a-f0-9]{40}$/.test(code)){txt(q('lookup-status'),'請填寫角色名稱及 40 碼查詢碼。');return;}
   active=true;q('lookup-submit').disabled=true;q('lookup-result').hidden=true;
-  txt(q('lookup-status'),'正在查詢 Google 訂單紀錄…');q('lookup-status').className='form-status';
+  txt(q('lookup-status'),'正在翻閱 Angulus 的委託紀錄，尋找您的訂單……');q('lookup-status').className='form-status';
   try{const res=await lookupOrder(character,code);
    if(res?.found&&res.receipt){renderReceipt(res.receipt);txt(q('lookup-status'),'已找到訂單。');}
    else{q('lookup-status').className='form-status error';txt(q('lookup-status'),res?.message||'查無符合的訂單，請檢查角色名稱與查詢碼。');}
