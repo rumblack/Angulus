@@ -400,3 +400,52 @@ main#home{padding-top:0}
 .receipt-message{margin:10px 0 0;padding:11px;border:1px solid #be9f6c;border-radius:5px;color:#153e66;background:#fff5da;font-weight:700;overflow-wrap:anywhere}
 
 .pending-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}.pending-actions[hidden]{display:none!important}.pending-actions .btn{font-size:12px;padding:7px 10px}
+
+/* V1.3.44 - standalone order lookup and parchment receipt */
+.site-header .lookup-current{color:#f4d6a1!important}
+.lookup-page{min-height:calc(100vh - 170px)}
+.lookup-content{max-width:760px;margin:auto}
+.lookup-heading{text-align:center;margin:0 auto 26px}
+.lookup-heading small{font:700 13px 'Cormorant Garamond',serif;letter-spacing:.22em;color:#987747}
+.lookup-heading h1{color:#123d72;font:700 clamp(28px,4vw,38px) 'Noto Serif TC',serif;letter-spacing:.14em;margin:8px 0}
+.lookup-heading p{font-size:14px;color:#62727a}
+.lookup-search,.lookup-receipt{padding:30px clamp(18px,4vw,42px);position:relative}
+.lookup-search .order-header{text-align:center}
+.lookup-search .order-header h2,.lookup-receipt .order-header h2{justify-content:center}
+#lookup-form{display:grid;gap:8px}
+#lookup-form label{font-size:13px;font-weight:600;margin-top:12px;color:#564632}
+#lookup-form input{display:block;width:100%;background:#fffcf4;border:1px solid #c9b38c;border-radius:4px;padding:12px 13px;color:#3b342a;font-size:14px}
+#lookup-form .submit-btn{width:100%;margin-top:16px}
+.lookup-hint,.lookup-footer-note{font-size:12px;line-height:1.85;color:#756950;margin:18px 0 4px}
+.lookup-recent{margin:24px 0}
+.lookup-recent h2{font:700 20px 'Noto Serif TC',serif;color:#153b65}
+.lookup-recent p{font-size:12px;color:#697079}
+.recent-list{display:flex;gap:10px;flex-wrap:wrap}
+.recent-entry{display:flex;flex-direction:column;align-items:start;gap:5px;max-width:100%;padding:12px 16px;border:1px solid #cfbb98;background:#fff9ed;color:#234463;border-radius:6px}
+.recent-entry:hover{background:#efe4cd}
+.recent-entry small{font-size:11px;color:#756950}
+.lookup-clear{background:none;border:0;color:#7c5548;font-size:12px;text-decoration:underline;padding:8px 0;margin-top:8px}
+.lookup-receipt{margin-top:28px}
+.receipt-metadata{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 0;border-top:1px solid #c5ae85;border-bottom:1px solid #c5ae85}
+.receipt-metadata div{display:flex;flex-direction:column;gap:4px}
+.receipt-metadata span{color:#8b7756;font-size:12px}
+.receipt-metadata strong{color:#2e3d43;font-size:14px}
+.lookup-receipt h3{font:700 18px 'Noto Serif TC',serif;color:#153f6b;margin:22px 0 10px}
+.receipt-line{display:flex;align-items:start;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px dashed #cbb798}
+.receipt-line>div{display:flex;flex-direction:column;gap:5px;min-width:0}
+.receipt-line strong{font-size:13px;color:#40382d}
+.receipt-line small{font-size:11px;color:#826c4d;line-height:1.5}
+.receipt-line>strong{white-space:nowrap;color:#164a7d}
+.receipt-total{display:flex;justify-content:space-between;align-items:center;padding:20px 0 10px;gap:12px}
+.receipt-total strong{color:#164a7d;font:700 22px 'Noto Serif TC',serif}
+.receipt-quote{padding:14px;background:#efe1c1;color:#554025;border-radius:5px;font-size:13px;line-height:1.8}
+.lookup-print{display:block;margin-top:14px;border:1px solid #b59a73;background:#fff8e8;color:#604c33;padding:9px 14px;border-radius:4px}
+.lookup-confirmation{background:#fff9e7;border:1px solid #bfa173;border-radius:5px;padding:12px;margin-top:14px;color:#4d3d2d;line-height:1.7;font-size:12px}
+.lookup-confirmation>strong{display:block;font-size:13px;margin-bottom:5px}
+.lookup-confirmation-code{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lookup-confirmation-code code{font-size:11px;word-break:break-all;user-select:all;flex:1}
+.lookup-copy{padding:5px 10px;border:1px solid #bfa173;border-radius:4px;background:#fffdf6;color:#4b392b}
+.lookup-confirmation a{text-decoration:underline;color:#164a7d}
+.brand-gem{font-size:28px;color:#e4c58e;line-height:1}
+@media(max-width:520px){.receipt-metadata{gap:14px}.lookup-search,.lookup-receipt{padding:22px 17px}.receipt-line strong{font-size:12px}}
+@media print{.site-header,.lookup-heading,.lookup-search,.lookup-recent,.lookup-print,footer{display:none!important}.lookup-page{padding:0;background:#fff}.lookup-receipt{display:block!important;box-shadow:none;border:1px solid #aaa;margin:0}}

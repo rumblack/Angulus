@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded',setup);
 // Direct fetch() POST to Apps Script from Pages often fails due to cross-origin redirects.
 // Do not infer delivery from iframe load; only a receipt found in the private Sheet confirms success.
 const receiptKey='angulus-last-uncertain-order';
+const angulusOrderHistoryKey='angulus-order-history-v1';
 let googleSubmitting=false;
 function receiptStore(value){try{if(value)localStorage.setItem(receiptKey,JSON.stringify(value));else localStorage.removeItem(receiptKey);}catch(_){}}
 function randomRequestId(){
@@ -139,9 +140,26 @@ function initializePendingRecovery(){
  check.addEventListener('click',async()=>{const pending=loadPending();if(!pending)return;const url=String(config.googleScriptUrl||'');const s=$('form-status');s.textContent='正在核對上一筆訂單…';try{const found=await lookupReceipt(url,pending.requestId);if(found&&found.found){finishConfirmedOrder(found);s.textContent='上一筆訂單已確認：'+found.orderId+'。';}else{s.className='form-status error';s.textContent='Google 尚未找到這筆訂單；請在店主核對後決定是否重新提交。';}}catch(e){s.className='form-status error';s.textContent='查詢未成功，請聯絡店主核對。';}});
  clear.addEventListener('click',()=>{const p=loadPending();if(!p)return;if(!window.confirm('請先確認 Google 試算表中沒有這筆訂單。若已入帳而再次送出，可能產生重複訂單。確定放棄這筆未確認識別碼嗎？'))return;receiptStore(null);refreshPendingActions();$('form-status').textContent='已清除未確認紀錄，原本購物車保留。';});
 }
+function saveLookupHistory(character, requestId, orderId){
+ try{
+  if(!/^[a-f0-9]{40}$/.test(requestId)||!character)return;
+  const history=JSON.parse(localStorage.getItem(angulusOrderHistoryKey)||'[]');
+  const next=[{character,requestId,orderId,date:new Date().toISOString()},...(Array.isArray(history)?history:[]).filter(x=>x&&x.requestId!==requestId)].slice(0,15);
+  localStorage.setItem(angulusOrderHistoryKey,JSON.stringify(next));
+ }catch(_){/* Local history is optional; the visible code remains available. */}
+}
+function presentLookupCode(code){
+ const area=$('lookup-confirmation'), target=$('lookup-secret'),copy=$('copy-lookup-code');
+ if(!area||!target||!code)return;
+ target.textContent=code;area.hidden=false;
+ if(copy)copy.onclick=()=>{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>{copy.textContent='已複製';}).catch(()=>{copy.textContent='請選取並複製';});}else{copy.textContent='請選取並複製';}};
+}
 function finishConfirmedOrder(result){
+ const pending=loadPending();
+ const orderCharacter=(pending&&pending.character)||String(new FormData($('checkout-form')).get('character')||'').trim();
+ if(pending&&pending.requestId){saveLookupHistory(orderCharacter,pending.requestId,result.orderId);presentLookupCode(pending.requestId);}
  cart={};custom=[];save();renderCart();renderProducts();$('checkout-form').reset();
- const s=$('form-status');s.className='form-status';s.textContent='訂單已成功建立！訂單編號：'+result.orderId+'。請保存編號，並等候店主確認。';
+ const s=$('form-status');s.className='form-status';s.textContent='訂單已成功建立！訂單編號：'+result.orderId+'。請保存查詢碼，並等候店主確認。';
  $('receipt-message').hidden=false;$('receipt-message').textContent='您的訂單編號：'+result.orderId;
  receiptStore(null);refreshPendingActions();
 }
@@ -162,7 +180,7 @@ async function submitOrderGoogle(e){
   const requestId=randomRequestId();const payload=orderData();
   const body={payload:JSON.stringify(payload),requestId,website:'angulus',trap:''};
   if(body.payload.length>22000)throw Error('委託內容過長，請縮短備註或分開下單。');
-  receiptStore({requestId,createdAt:Date.now()});refreshPendingActions();
+  receiptStore({requestId,character:payload.character,createdAt:Date.now()});refreshPendingActions();
   postToAppsScript(url,body);
   status.textContent='訂單已送出，正在向 Google 試算表確認收件結果，請勿關閉頁面或重複送單。';
   const confirmed=await confirmReceipt(url,requestId);

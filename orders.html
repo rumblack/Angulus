@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+ <meta name="theme-color" content="#103b70"><meta name="robots" content="noindex,nofollow">
+ <meta name="description" content="Angulus 訂單查詢｜使用角色名稱與訂單查詢碼查詢收據與訂單進度。">
+ <title>訂單查詢｜Angulus</title>
+ <link rel="stylesheet" href="styles.css?v=1.3.44">
+ <script src="config.js?v=1.3.44" defer></script>
+ <script src="order-lookup.js?v=1.3.44" defer></script>
+</head>
+<body>
+ <header class="site-header"><div class="header-inner wrap">
+  <a href="index.html#home" class="brand"><span class="brand-gem" aria-hidden="true">◇</span><span><strong>Angulus</strong></span></a>
+  <button type="button" class="menu-toggle" id="lookup-menu" aria-expanded="false" aria-controls="lookup-nav">選單</button>
+  <nav id="lookup-nav" aria-label="主選單">
+   <a href="index.html#home">首頁</a><a href="index.html#shop">商品一覽</a><a href="index.html#process">訂購流程</a><a href="orders.html" aria-current="page" class="lookup-current">訂單查詢</a><a href="index.html#order" class="nav-order">訂購申請</a>
+  </nav>
+ </div></header>
+ <main class="lookup-page marble-area"><div class="wrap lookup-content">
+  <div class="lookup-heading"><small>ORDER LOOKUP</small><h1>訂單查詢</h1><p>查詢你在 Angulus 的訂單收據與目前處理進度。</p></div>
+  <section class="parchment lookup-search" aria-labelledby="lookup-title"><div class="order-header"><small>ORDER RECORD</small><h2 id="lookup-title">尋找我的訂單</h2><p>請輸入下單時的角色名稱及該筆訂單專屬查詢碼。</p></div>
+   <form id="lookup-form">
+    <label for="lookup-character">訂購人角色名稱 <span>*</span></label><input id="lookup-character" autocomplete="off" maxlength="60" required placeholder="輸入與訂單完全相同的角色名稱">
+    <label for="lookup-code">訂單查詢碼 <span>*</span></label><input id="lookup-code" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" minlength="40" pattern="[a-f0-9]{40}" required placeholder="下單完成後取得的 40 碼查詢碼">
+    <button class="btn submit-btn" id="lookup-submit" type="submit">查詢訂單</button>
+    <p class="form-status" id="lookup-status" role="status" aria-live="polite"></p>
+   </form>
+   <p class="lookup-hint">為了保護訂購資訊，僅輸入角色名稱無法查看完整收據。查詢碼會在新訂單成功成立時顯示，請妥善保存。</p>
+  </section>
+  <section id="recent-orders" class="lookup-recent" hidden><h2>此瀏覽器的近期訂單</h2><p>以下僅保存於此瀏覽器；點選可快速帶入角色名稱與查詢碼。</p><div id="recent-list" class="recent-list"></div><button type="button" class="lookup-clear" id="clear-order-history">清除此裝置的查詢紀錄</button></section>
+  <section id="lookup-result" class="parchment lookup-receipt" hidden aria-label="訂單收據"><div class="order-header"><small>ANGULUS · ORDER RECEIPT</small><h2>訂購收據</h2><p id="r-id"></p></div>
+   <div class="receipt-metadata"><div><span>訂購人</span><strong id="r-character"></strong></div><div><span>所屬伺服器</span><strong id="r-server"></strong></div><div><span>建立日期</span><strong id="r-date"></strong></div><div><span>訂單狀態</span><strong id="r-status" class="lookup-state"></strong></div><div><span>付款狀態</span><strong id="r-payment"></strong></div></div>
+   <h3>固定商品</h3><div id="r-items"></div><div class="receipt-total"><span>訂單小記</span><strong id="r-total"></strong></div>
+   <div id="r-commission-block" hidden><h3>裝備／客製委託</h3><div id="r-commissions"></div></div>
+   <div class="receipt-quote" id="r-quote"></div><p class="lookup-footer-note">此收據為訂購紀錄，實際價格、製作時間與交付方式以店主最後確認為準。</p>
+   <button type="button" class="lookup-print" id="lookup-print">列印／另存 PDF</button>
+  </section>
+ </div></main>
+ <footer><div class="wrap footer-inner"><div><strong>Angulus</strong></div><p>在每個細節裡，收藏屬於你的冒險。</p><small>獨立玩家製作小舖 · <span class="release-version">v1.3.44</span></small></div></footer>
+</body></html>
