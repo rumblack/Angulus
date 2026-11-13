@@ -2,7 +2,7 @@
 window.SHOP_CONFIG = {
   name: 'Angulus',
   englishName: 'Angulus',
-  tagline: '遊戲道具製作小舖',
+  tagline: '道具製作小舖',
   notice: '本店所有商品皆以 FF14 遊戲內貨幣 Gil 計價。訂單送出後，店主將依實際庫存與製作安排確認所需時間，並與您協調交付方式及時段，請以最終回覆為準。',
   contactLabel: 'Discord 聯絡店主',
   contactUrl: '', // 例如 https://discord.gg/你的邀請連結 ，留空則隱藏

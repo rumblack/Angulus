@@ -66,3 +66,14 @@ GitHub Pages 本身只有靜態頁面，**不會自行儲存或接收訂單**。
 - 常駐商品「高山茶一組」維持 999 杯／329,000 Gil。
 - 其他商品價格與 Formspree 接單網址維持不變。
 - 已同步更新 index.html 的資源版本參數與頁尾版本標記。
+
+
+## V1.3.31 預覽標題修正
+- 修正 `script.js` 在載入完成後覆寫 HTML `<title>` 的問題。瀏覽器頁籤現在保留 `Angulus｜FF14 道具製作與委託訂購`。
+- `config.js` 內副標語改為「道具製作小舖」。
+- 保留現有的 SEO meta description、Open Graph、Twitter 標題與說明。
+- 資源載入參數更新為 `?v=1.3.31`，頁尾版本改為 `v1.3.31`。
+- **請上傳 `index.html`、`script.js`、`config.js` 三檔**到 GitHub Pages 真正的發布目錄。
+- 分享卡片抓取的是公開網站回傳的 HTML meta，不是 JavaScript 產生的頁籤文字。Discord 可能有快取，且 GitHub Pages 上傳錯誤分支、目錄或尚未成功部署也會顯示舊資料。
+- 測試時開啟網站 `view-source:` 原始碼，搜尋 `og:description` 並確認是否包含「Angulus 道具製作小舖」，同時確認 `angulus-version=1.3.31`；如果顯示舊內容，請核對 Settings > Pages 的發布來源與 Actions 部署結果。
+- 在分享網址後加 `?preview=13131` 可能使部分社群平台以新網址重新抓取，但不保證立即更新，而且必須先確認原始網站已部署成功。
