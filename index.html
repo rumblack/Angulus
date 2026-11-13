@@ -13,8 +13,8 @@
  <meta name="twitter:card" content="summary">
  <meta name="twitter:title" content="Angulus｜FF14 道具製作與委託訂購">
  <meta name="twitter:description" content="Angulus 道具製作小舖｜提供各類客製化委託服務。使用 Gil 計價，歡迎冒險者選購與提出需求。">
- <link rel="stylesheet" href="styles.css?v=1.3.31">
- <script src="config.js?v=1.3.31" defer></script><script src="script.js?v=1.3.31" defer></script>
+ <link rel="stylesheet" href="styles.css?v=1.3.41">
+ <script src="config.js?v=1.3.41" defer></script><script src="script.js?v=1.3.41" defer></script>
 </head>
 <body>
  <svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><symbol id="ico-gem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 7-8 11L4 10l8-7Z"/><path d="M4 10h16M9 3l-2 7 5 11 5-11-2-7"/></symbol><symbol id="ico-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></symbol><symbol id="ico-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 7 9-4 9 4-9 4-9-4Z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></symbol><symbol id="ico-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.7 6.3 3 3"/></symbol><symbol id="ico-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h12M9 12h12M9 18h12"/><path d="m3.5 6 1.2 1.2L6.8 5M3.5 12l1.2 1.2L6.8 11M3.5 18l1.2 1.2L6.8 17"/></symbol><symbol id="ico-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1"/><circle cx="19" cy="20" r="1"/><path d="M2 3h2l2.4 12h13.2L22 7H5"/></symbol><symbol id="ico-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="ico-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></symbol><symbol id="ico-gift" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M2 9h20M12 9v12M12 9S6 8 6 5a2 2 0 0 1 4 0c0 2 2 4 2 4Zm0 0s6-1 6-4a2 2 0 0 0-4 0c0 2-2 4-2 4Z"/></symbol><symbol id="ico-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol><symbol id="ico-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3-7 8-7s8 3 8 7"/></symbol><symbol id="ico-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol><symbol id="ico-leaf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4c-9 0-15 4-15 11a5 5 0 0 0 5 5c7 0 11-6 10-16Z"/><path d="M5 20c3-5 7-8 12-10"/></symbol></svg>
@@ -36,6 +36,31 @@
     <section id="shop" class="section"><div class="section-heading"><div><small>CURATED COLLECTION</small><h2><svg class="ui-icon heading-icon" aria-hidden="true" focusable="false"><use href="#ico-box"></use></svg>精選商品</h2></div></div>
      <div class="filters" id="filters" role="tablist" aria-label="商品分類"></div>
      <div class="product-grid" id="products" role="tabpanel" aria-label="常駐商品"></div>
+     <section id="equipment" class="custom-inline" hidden aria-labelledby="equipment-title" role="tabpanel">
+      <div class="custom-inline-heading"><small>EQUIPMENT COMMISSIONS</small><h3 id="equipment-title"><svg class="ui-icon heading-icon" aria-hidden="true"><use href="#ico-pen"></use></svg>裝備訂製</h3><p>先選擇裝備類型，再挑選所需職業，最後填寫訂製需求。所有裝備均由店主確認後報價。</p></div>
+      <div class="equipment-category-step" id="equipment-category-step">
+       <h4 class="equipment-step-title"><span class="equipment-step-number">01</span>選擇裝備大類</h4>
+       <div class="equipment-type-grid" role="group" aria-label="裝備大類型">
+        <button type="button" class="equipment-type-btn" data-equipment-type="戰鬥裝備" aria-pressed="false"><span class="equipment-type-identity"><svg class="ui-icon" aria-hidden="true"><use href="#ico-gem"></use></svg><strong>戰鬥裝備</strong></span><span class="equipment-type-description">防護、治療、近戰攻擊、遠程物理與遠程魔法職業</span></button>
+        <button type="button" class="equipment-type-btn" data-equipment-type="製作採集" aria-pressed="false"><span class="equipment-type-identity"><svg class="ui-icon" aria-hidden="true"><use href="#ico-box"></use></svg><strong>製作採集</strong></span><span class="equipment-type-description">製作職業：刻木、鍛鐵、鑄甲等<br>採集職業：採礦、園藝、捕魚</span></button>
+       </div>
+      </div>
+      <div id="equipment-job-step" class="equipment-job-step" hidden>
+       <div class="equipment-step-heading"><h4 class="equipment-step-title"><span class="equipment-step-number">02</span>選擇職業</h4><button class="equipment-back" type="button" id="equipment-back-type">更換大類</button></div>
+       <p class="equipment-step-hint" id="equipment-job-hint">請選擇一個職業。</p>
+       <div class="equipment-job-groups" id="equipment-job-groups"></div>
+      </div>
+      <form id="equipment-form" novalidate hidden>
+       <div class="equipment-step-heading"><h4 class="equipment-step-title"><span class="equipment-step-number">03</span>填寫訂製內容</h4><button class="equipment-back" type="button" id="equipment-back-job">重選職業</button></div>
+       <p class="equipment-selection-summary" id="equipment-selection-summary" aria-live="polite"></p>
+       <label for="equipment-name">裝備名稱 <span>*</span><input id="equipment-name" maxlength="100" required placeholder="例如：指定裝備或套裝名稱"></label>
+       <label for="equipment-qty">訂製數量 <span>*</span><input id="equipment-qty" type="number" min="1" max="99" step="1" value="1" required></label>
+       <label for="equipment-details">訂製需求 <span>*</span><textarea id="equipment-details" rows="5" maxlength="1800" required placeholder="請填寫裝備等級、品質、特殊要求、希望交期或其他細節"></textarea></label>
+       <p class="custom-help">加入後會顯示在右側訂購申請單中，狀態為「待報價」。不會立即扣除 Gil。</p>
+       <button type="submit" class="btn btn-primary custom-submit"><svg class="ui-icon btn-icon" aria-hidden="true"><use href="#ico-plus"></use></svg>加入訂購申請單</button>
+       <p class="custom-status" id="equipment-status" role="status" aria-live="polite"></p>
+      </form>
+     </section>
      <section id="commission" class="custom-inline" hidden aria-labelledby="custom-inline-title">
       <div class="custom-inline-heading"><small>CUSTOM REQUEST</small><h3 id="custom-inline-title"><svg class="ui-icon heading-icon" aria-hidden="true"><use href="#ico-pen"></use></svg>客製化委託</h3><p>請直接填寫需要製作的道具、數量與特殊要求。客製項目由店主另行報價。</p></div>
       <form id="custom-form" novalidate>
@@ -52,11 +77,11 @@
   </div>
   <aside class="right-column"><section id="order" class="parchment order-panel"><div class="pin"></div><div class="order-header"><small>ORDER REQUEST</small><h2><svg class="ui-icon heading-icon" aria-hidden="true" focusable="false"><use href="#ico-cart"></use></svg>訂購申請單</h2><p>請確認您選購的商品及需求</p></div>
     <div id="cart-items" class="cart-items"><div class="empty-cart"><p>尚未選擇商品</p><small>請先從左側挑選商品<br>並將需要的項目加入訂單。</small></div></div>
-    <div class="total"><span>固定商品小計</span><strong id="cart-total">0 Gil</strong></div><p class="quote-note" id="quote-note" hidden>＊含客製委託項目，最終金額需等待店主報價。</p>
+    <div class="total"><span>訂單小記</span><strong id="cart-total">0 Gil</strong></div><p class="quote-note" id="quote-note" hidden>＊含客製委託項目，最終金額需等待店主報價。</p>
     <form id="checkout-form"><h3><svg class="ui-icon form-icon" aria-hidden="true" focusable="false"><use href="#ico-user"></use></svg>訂購人資訊</h3><label>角色名稱 <span>*</span><input required name="character" maxlength="60" placeholder="遊戲內角色名稱"></label><label>所屬伺服器 <span>*</span><select required name="server" aria-label="所屬伺服器"><option value="" disabled selected>請選擇伺服器</option><option value="伊弗利特">伊弗利特</option><option value="迦樓羅">迦樓羅</option><option value="利維坦">利維坦</option><option value="鳳凰">鳳凰</option><option value="奧汀">奧汀</option><option value="巴哈姆特">巴哈姆特</option><option value="泰坦">泰坦</option></select></label><label>聯絡方式 <span>*</span><input required name="contact" maxlength="120" placeholder="Discord ID 或電子郵件"></label><label>希望交貨日期 <input type="date" name="deliveryDate"></label><label>方便交易時段 <input name="deliveryTime" maxlength="100" placeholder="例如：週末 20:00 後"></label><label>補充備註 <textarea name="notes" rows="3" maxlength="1200" placeholder="交付方式、特別需求等"></textarea></label><label class="agree"><input type="checkbox" required name="accept"><span>已閱讀注意事項，了解送單後需等待店主確認，且不會有寶箱怪偷走客人的Gil。</span></label><button class="btn submit-btn" id="submit-order" type="submit">送出訂購申請</button><p id="form-status" class="form-status" role="status" aria-live="polite"></p></form>
    </section></aside>
   </div></div>
  </main>
- <footer><div class="wrap footer-inner"><div><strong id="footer-name">Angulus</strong> <span>Angulus</span></div><p>在每個細節裡，收藏屬於你的冒險。</p><small>獨立玩家製作小舖 · 非遊戲官方網站 · <span class="release-version">v1.3.31</span></small></div></footer>
+ <footer><div class="wrap footer-inner"><div><strong id="footer-name">Angulus</strong> <span>Angulus</span></div><p>在每個細節裡，收藏屬於你的冒險。</p><small>獨立玩家製作小舖 · 非遊戲官方網站 · <span class="release-version">v1.3.41</span></small></div></footer>
 </body>
 </html>

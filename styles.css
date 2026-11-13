@@ -269,3 +269,129 @@ main#home{padding-top:0}
 .shop-location-detail strong{font-size:14px;color:#fff7e9;font-weight:600;overflow-wrap:anywhere}
 @media(max-width:800px){.shop-location-inner{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px 18px}.shop-location-heading{min-width:0}.shop-location-detail{padding-left:12px}}
 @media(max-width:440px){.shop-location-inner{grid-template-columns:1fr;gap:10px;padding-top:12px;padding-bottom:14px}.shop-location-heading{display:flex;align-items:baseline;gap:12px}.shop-location-detail{display:flex;align-items:baseline;gap:9px;padding-left:0;border-left:0;border-top:1px solid #c4a16a38;padding-top:8px}.shop-location-label{min-width:105px;flex:0 0 105px}.shop-location-detail strong{font-size:13px}}
+
+/* Angulus v1.3.32: equipment ordering tab shares existing parchment-inspired inline form */
+#equipment[hidden]{display:none!important}
+#equipment .custom-inline-heading,#equipment form{max-width:100%}
+#equipment input[type=number]{width:100%;border:1px solid #c7b38e;background:#fffaf1dc;border-radius:3px;padding:9px 10px;margin-top:5px;color:#40382d;font-size:13px}
+
+
+/* Angulus v1.3.33: two-stage equipment selector, text-only profession tiles */
+#equipment-job-step[hidden],#equipment-form[hidden]{display:none!important}
+.equipment-step-title{display:flex;align-items:center;gap:10px;color:#173d63;font:700 16px/1.5 'Noto Serif TC',serif;margin:8px 0 15px}
+.equipment-step-number{display:inline-grid;place-items:center;width:29px;height:29px;border:1px solid #c8a674;border-radius:50%;color:#99764a;font:700 12px 'Cormorant Garamond',serif;letter-spacing:.04em}
+.equipment-type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-bottom:16px}
+.equipment-type-btn{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:130px;padding:20px 11px;border:1px solid #d1bb94;border-radius:9px;background:linear-gradient(135deg,#fffaf1,#f2e7d3);color:#193c61;text-align:center;transition:transform .15s,border-color .15s,background .15s}
+.equipment-type-btn .ui-icon{width:25px;height:25px;color:#ae8851}.equipment-type-btn strong{font-size:16px}.equipment-type-btn span{font-size:11px;line-height:1.55;color:#766b5c}
+.equipment-type-btn:hover,.equipment-type-btn[aria-pressed=true]{border-color:#a77840;background:#f5e5c8;transform:translateY(-1px)}
+.equipment-job-step{margin-top:20px;border-top:1px solid #dec9a4;padding-top:18px}
+.equipment-step-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.equipment-step-heading h4{margin:0 0 10px}
+.equipment-back{padding:6px 10px;border:1px solid #cab28e;background:#fff9ec;color:#61513d;border-radius:5px;font-size:12px;margin-bottom:10px}
+.equipment-back:hover{background:#f0dfc0}.equipment-step-hint{font-size:12px;color:#75695b;line-height:1.7;margin:4px 0 17px}
+.equipment-job-groups{display:grid;gap:18px}.equipment-job-group{min-width:0}.equipment-job-group h5{font:700 13px 'Noto Sans TC',sans-serif;color:#5a534b;border-bottom:1px solid #dac8aa;padding-bottom:7px;margin:0 0 10px}
+.equipment-job-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(83px,1fr));gap:9px}
+.equipment-job-btn{--job-color:#2b4f79;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;min-width:0;min-height:88px;border:1px solid color-mix(in srgb,var(--job-color) 45%,#c9b69c);border-radius:8px;background:linear-gradient(145deg,color-mix(in srgb,var(--job-color) 16%,white),#fffaf3);color:#22364d;transition:border-color .16s,transform .16s,box-shadow .16s}
+.equipment-job-btn:hover,.equipment-job-btn[aria-pressed=true]{border:2px solid var(--job-color);box-shadow:0 0 0 2px color-mix(in srgb,var(--job-color) 13%,transparent);transform:translateY(-1px)}
+.equipment-job-btn:focus-visible,.equipment-type-btn:focus-visible,.equipment-back:focus-visible{outline:3px solid #bd924c;outline-offset:2px}
+.job-monogram{display:grid;place-items:center;width:40px;height:35px;border-radius:6px;background:var(--job-color);color:#fff5dc;font:700 12px/1 Arial,sans-serif;letter-spacing:.03em}
+.job-label{font-size:11px;line-height:1.4;text-align:center;font-weight:600}
+.role-tank{--job-color:#314d91}.role-healer{--job-color:#478167}.role-melee{--job-color:#85405a}.role-ranged{--job-color:#895337}.role-caster{--job-color:#735092}.role-craft{--job-color:#705987}.role-gather{--job-color:#4c7968}
+#equipment-form{display:grid;gap:15px;margin-top:20px;border-top:1px solid #dec9a4;padding-top:18px}
+#equipment-form label{display:block;font-size:13px;color:#463d31}
+#equipment-form label>span{color:#a64b35}
+#equipment-form input:not([type=checkbox]),#equipment-form textarea{width:100%;box-sizing:border-box;background:#fffdf9;border:1px solid #cdb994;margin-top:8px;padding:11px 12px;border-radius:4px;color:#453c31;resize:vertical}
+.equipment-selection-summary{font-size:13px;background:#e6edee;border-left:3px solid #28618b;color:#16466d;padding:9px 12px;margin:0}
+@media(max-width:460px){.equipment-type-grid{grid-template-columns:1fr}.equipment-type-btn{min-height:102px;padding:13px}.equipment-job-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.equipment-job-btn{min-height:82px;padding:6px 2px}.job-label{font-size:10px}}
+
+
+/* V1.3.34: transparent profession icons supplied by shop owner */
+.equipment-job-btn .job-icon-img{display:block!important;width:48px;height:48px;min-width:0;max-width:100%;object-fit:contain;object-position:center;flex:0 0 48px;background:transparent;border:0;box-shadow:none;image-rendering:auto}
+.equipment-job-btn:has(.job-icon-img){gap:6px;padding:9px 4px;min-height:99px}
+.equipment-job-btn .job-label{white-space:normal;overflow-wrap:anywhere}
+@media(max-width:460px){.equipment-job-btn .job-icon-img{width:42px;height:42px;flex-basis:42px}.equipment-job-btn:has(.job-icon-img){min-height:93px}}
+
+
+/* V1.3.38: 職業按鈕與圖示約縮為原本的一半，隱藏職業名稱 */
+.equipment-job-grid{grid-template-columns:repeat(auto-fill,46px);gap:7px;justify-content:start}
+.equipment-job-btn,.equipment-job-btn:has(.job-icon-img){box-sizing:border-box;width:46px;height:50px;min-width:46px;min-height:50px;max-height:50px;padding:3px;gap:0;border-radius:6px}
+.equipment-job-btn .job-icon-img{width:24px;height:24px;min-width:24px;max-width:24px;flex:0 0 24px;object-fit:contain}
+.equipment-job-btn .job-label{display:none!important}
+.equipment-job-btn .job-monogram{width:26px;height:26px;font-size:10px;letter-spacing:0;border-radius:4px}
+@media(max-width:460px){
+ .equipment-job-grid{grid-template-columns:repeat(auto-fill,46px);gap:7px}
+ .equipment-job-btn,.equipment-job-btn:has(.job-icon-img){width:46px;height:50px;min-width:46px;min-height:50px;max-height:50px;padding:3px}
+ .equipment-job-btn .job-icon-img{width:24px;height:24px;flex-basis:24px}
+}
+
+/* V1.3.39: Responsive grouped job icons. Groups share rows when space permits. */
+.equipment-job-groups{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:flex-start;column-gap:18px;row-gap:18px}
+.equipment-job-group{flex:0 1 auto;width:max-content;max-width:100%;min-width:0}
+.equipment-job-group h5{margin:0 0 8px;padding-bottom:5px;white-space:nowrap}
+.equipment-job-grid{display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:flex-start;gap:7px;max-width:100%}
+.equipment-job-btn,.equipment-job-btn:has(.job-icon-img){flex:0 0 46px}
+@media(max-width:460px){.equipment-job-groups{column-gap:13px;row-gap:16px}}
+
+
+/* V1.3.40: horizontally composed, equal-height equipment category choices */
+.equipment-type-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:stretch;
+  gap:13px;
+}
+.equipment-type-grid .equipment-type-btn{
+  display:grid;
+  grid-template-columns:minmax(94px,.8fr) minmax(0,1.25fr);
+  align-items:center;
+  column-gap:14px;
+  width:100%;
+  height:116px;
+  min-height:116px;
+  padding:15px 16px;
+  text-align:left;
+}
+.equipment-type-btn .equipment-type-identity{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.equipment-type-btn .equipment-type-identity .ui-icon{
+  width:24px;
+  height:24px;
+  color:#ae8851;
+}
+.equipment-type-btn .equipment-type-identity strong{
+  font-size:15px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.equipment-type-btn .equipment-type-description{
+  display:block;
+  min-width:0;
+  font-size:11px;
+  line-height:1.75;
+  color:#766b5c;
+  overflow-wrap:anywhere;
+}
+@media(max-width:860px){
+  .equipment-type-grid{grid-template-columns:1fr}
+  .equipment-type-grid .equipment-type-btn{
+    grid-template-columns:minmax(105px,.7fr) minmax(0,1.3fr);
+    height:104px;
+    min-height:104px;
+  }
+}
+@media(max-width:460px){
+  .equipment-type-grid .equipment-type-btn{
+    grid-template-columns:100px minmax(0,1fr);
+    height:108px;
+    min-height:108px;
+    padding:12px 14px;
+    column-gap:12px;
+  }
+  .equipment-type-btn .equipment-type-identity strong{font-size:14px}
+  .equipment-type-btn .equipment-type-description{font-size:11px}
+}
