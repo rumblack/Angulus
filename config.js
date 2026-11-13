@@ -14,8 +14,9 @@ window.SHOP_CONFIG = {
     { id:'grade3-intelligence-potion-99', name:'3級智力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'一組共 99 瓶。能夠提升智力的寶藥，為施展法術與迎接挑戰做好準備。' },
     { id:'grade3-mind-potion-99', name:'3級意力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'一組共 99 瓶。能夠提升精神與意力，為守護同伴的旅途增添一份安心。' },
     { id:'grade3-dexterity-potion-99', name:'3級巧力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'一組共 99 瓶。蘊含提升靈巧的藥效，讓每一次出手更加俐落，陪伴冒險者從容迎接挑戰。' },
-    // 少量購買：複製常駐商品（高山茶除外），每份為 10 塊／10 瓶。
+    // 少量購買：高山茶每份 99 杯，餅乾每份 10 塊、寶藥每份 10 瓶。
     // 少量購買價格：餅乾每份 6,000 Gil；四種寶藥每組 13,000 Gil。
+    { id:'mountain-tea-99', name:'一小份高山茶', category:'少量購買', price:32500, days:'依店主確認', badge:'少量', desc:'一份共 99 杯高山茶。前往舊薩雷安時，不妨備上一小份暖心茶香，說不定正好能派上用場。' },
     { id:'mate-cookies-10', name:'高級瑪黛茶餅乾', category:'少量購買', price:6000, days:'依店主確認', badge:'少量', desc:'一份共 10 塊高級瑪黛茶餅乾，香甜酥脆，是陪伴你踏上旅途、探索未知的最佳良伴。' },
     { id:'grade3-strength-potion-10', name:'3級剛力之寶藥', category:'少量購買', price:13000, days:'依店主確認', badge:'少量', desc:'一組共 10 瓶。蘊含強化力量的藥效，為奮戰在前線的冒險者增添一份助力。' },
     { id:'grade3-intelligence-potion-10', name:'3級智力之寶藥', category:'少量購買', price:13000, days:'依店主確認', badge:'少量', desc:'一組共 10 瓶。能夠提升智力的寶藥，為施展法術與迎接挑戰做好準備。' },
