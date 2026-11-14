@@ -155,8 +155,8 @@ function refreshPendingActions(){const p=$('pending-actions');if(p)p.hidden=!loa
 function loadPending(){try{const d=JSON.parse(localStorage.getItem(receiptKey)||'null');return d&&d.requestId?d:null;}catch(_){return null;}}
 function initializePendingRecovery(){
  const check=$('check-pending'),clear=$('clear-pending');if(!check||!clear)return;refreshPendingActions();
- check.addEventListener('click',async()=>{const pending=loadPending();if(!pending)return;const url=String(config.googleScriptUrl||'');const s=$('form-status');s.textContent='正在核對上一筆訂單…';try{const found=await lookupReceipt(url,pending.requestId);if(found&&found.found){finishConfirmedOrder(found);s.textContent='上一筆訂單已確認：'+found.orderId+'。';}else{s.className='form-status error';s.textContent='Google 尚未找到這筆訂單；請在店主核對後決定是否重新提交。';}}catch(e){s.className='form-status error';s.textContent='查詢未成功，請聯絡店主核對。';}});
- clear.addEventListener('click',()=>{const p=loadPending();if(!p)return;if(!window.confirm('請先確認 Google 試算表中沒有這筆訂單。若已入帳而再次送出，可能產生重複訂單。確定放棄這筆未確認識別碼嗎？'))return;receiptStore(null);refreshPendingActions();$('form-status').textContent='已清除未確認紀錄，原本購物車保留。';});
+ check.addEventListener('click',async()=>{const pending=loadPending();if(!pending)return;const url=String(config.googleScriptUrl||'');const s=$('form-status');s.textContent='正在查閱上一份委託紀錄……';try{const found=await lookupReceipt(url,pending.requestId);if(found&&found.found){finishConfirmedOrder(found);s.textContent='已尋得上一份委託，編號：'+found.orderId+'。';}else{s.className='form-status error';s.textContent='工坊尚未查得這份委託的收件紀錄，請先由店主協助核對，再決定是否重新遞交。';}}catch(e){s.className='form-status error';s.textContent='暫時無法查閱委託紀錄，請聯絡店主協助核對。';}});
+ clear.addEventListener('click',()=>{const p=loadPending();if(!p)return;if(!window.confirm('請先確認 Google 試算表中沒有這筆訂單。若已入帳而再次送出，可能產生重複訂單。確定放棄這筆未確認識別碼嗎？'))return;receiptStore(null);refreshPendingActions();$('form-status').textContent='待核對紀錄已清除，原先選購的品項仍為您保留。';});
 }
 function saveLookupHistory(character, requestId, orderId){
  try{
@@ -170,15 +170,15 @@ function presentLookupCode(code){
  const area=$('lookup-confirmation'), target=$('lookup-secret'),copy=$('copy-lookup-code');
  if(!area||!target||!code)return;
  target.textContent=code;area.hidden=false;
- if(copy)copy.onclick=()=>{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>{copy.textContent='已複製';}).catch(()=>{copy.textContent='請選取並複製';});}else{copy.textContent='請選取並複製';}};
+ if(copy)copy.onclick=()=>{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(()=>{copy.textContent='密鑰已複製';}).catch(()=>{copy.textContent='請手動選取密鑰並複製';});}else{copy.textContent='請手動選取密鑰並複製';}};
 }
 function finishConfirmedOrder(result){
  const pending=loadPending();
  const orderCharacter=(pending&&pending.character)||String(new FormData($('checkout-form')).get('character')||'').trim();
  if(pending&&pending.requestId){saveLookupHistory(orderCharacter,pending.requestId,result.orderId);presentLookupCode(pending.requestId);}
  cart={};custom=[];save();renderCart();renderProducts();$('checkout-form').reset();
- const s=$('form-status');s.className='form-status';s.textContent='訂單已成功建立！訂單編號：'+result.orderId+'。請保存查詢碼，並等候店主確認。';
- $('receipt-message').hidden=false;$('receipt-message').textContent='您的訂單編號：'+result.orderId;
+ const s=$('form-status');s.className='form-status';s.textContent='委託已登記入冊！委託編號：'+result.orderId+'。請妥善保管查閱密鑰，靜候店主確認。';
+ $('receipt-message').hidden=false;$('receipt-message').textContent='您的委託編號：'+result.orderId;
  receiptStore(null);refreshPendingActions();
 }
 async function submitOrderGoogle(e){
@@ -191,21 +191,21 @@ async function submitOrderGoogle(e){
  }
  const uncertain=(()=>{try{return JSON.parse(localStorage.getItem(receiptKey)||'null');}catch(_){return null;}})();
  if(uncertain&&uncertain.requestId){
-  status.classList.add('error');status.textContent='上一筆訂單尚未確認接收，請先使用原訂單識別碼查詢或聯絡店主，避免重複下單。';return;
+  status.classList.add('error');status.textContent='先前遞交的委託尚待核對，請先查閱原委託紀錄或聯絡店主，避免重複遞交。';return;
  }
- const button=$('submit-order');googleSubmitting=true;button.disabled=true;button.textContent='正在確認訂單…';
+ const button=$('submit-order');googleSubmitting=true;button.disabled=true;button.textContent='正在核對委託書……';
  try{
   const requestId=randomRequestId();const payload=orderData();
   const body={payload:JSON.stringify(payload),requestId,website:'angulus',trap:''};
   if(body.payload.length>22000)throw Error('委託內容過長，請縮短備註或分開下單。');
   receiptStore({requestId,character:payload.character,createdAt:Date.now()});refreshPendingActions();
   postToAppsScript(url,body);
-  status.textContent='訂單已送出，正在向 Google 試算表確認收件結果，請勿關閉頁面或重複送單。';
+  status.textContent='委託書已遞交，工坊正在核對收件紀錄。請暫留此頁，切勿重複遞交。';
   const confirmed=await confirmReceipt(url,requestId);
   if(confirmed){finishConfirmedOrder(confirmed);}else{
-   status.classList.add('error');status.textContent='尚未收到 Google 訂單確認。請勿立刻重送；請向店主提供查詢識別碼 '+requestId+' 核對是否已入帳。您的購物車仍保留。';
+   status.classList.add('error');status.textContent='工坊尚未回傳委託收件確認。請勿立即重送；請將這組核對識別碼提供給店主：'+requestId+'，以核對是否已收件。您原先選購的品項仍會保留。';
   }
- }catch(err){status.classList.add('error');status.textContent='送單未確認：'+err.message+'。請先聯絡店主核對再重新送出。';}
+ }catch(err){status.classList.add('error');status.textContent='委託收件尚未確認：'+err.message+'。請先聯絡店主核對，再考慮重新遞交。';}
  finally{googleSubmitting=false;button.disabled=false;button.textContent='送出訂購申請';}
 }
 function submitOrder(e){
