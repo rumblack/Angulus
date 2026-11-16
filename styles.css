@@ -471,3 +471,16 @@ main#home{padding-top:0}
 .lookup-retry:focus-visible{outline:2px solid #164a7d;outline-offset:3px}
 @media(max-width:540px){.lookup-retry{width:100%}}
 @media print{.lookup-retry{display:none!important}}
+
+
+/* V1.3.52 — 裝備訂製：指定套裝後選擇整套或散件 */
+.equipment-set-field{display:grid;gap:9px;min-width:0;margin:4px 0 8px}
+.equipment-set-field[hidden]{display:none!important}
+.equipment-set-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.equipment-set-choice{min-width:0;min-height:65px;padding:10px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:1px solid #cdb994;border-radius:6px;background:#fffaf1;color:#173d65;font:700 14px/1.4 'Noto Sans TC',sans-serif;cursor:pointer}
+.equipment-set-choice small{color:#796c5b;font:400 11px/1.5 'Noto Sans TC',sans-serif}
+.equipment-set-choice:hover{background:#f1e2c8;border-color:#ae8550}
+.equipment-set-choice[aria-pressed="true"]{background:#164a7d;border-color:#164a7d;color:#fff9ed}
+.equipment-set-choice[aria-pressed="true"] small{color:#f4e6cc}
+.equipment-set-choice:focus-visible{outline:3px solid #c5a16a;outline-offset:2px}
+@media(max-width:480px){.equipment-set-options{gap:7px}.equipment-set-choice{font-size:13px;padding:9px 7px;min-height:70px}.equipment-set-choice small{font-size:10px}}
