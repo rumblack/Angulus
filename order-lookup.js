@@ -29,15 +29,25 @@ function renderReceipt(r){
  q('lookup-result').hidden=false;
  q('lookup-result').scrollIntoView({behavior:'smooth',block:'start'});
 }
+// 透過既有 Apps Script JSONP 端點查詢訂單；保留目前角色名稱＋密鑰驗證方式。
+// VPN 或跨區網路偶爾會增加 Google 轉址時間，因此等待上限為 30 秒。
+const LOOKUP_TIMEOUT_MS=30000;
+function lookupError(kind,message){const e=new Error(message);e.kind=kind;return e;}
 function lookupOrder(character,code){
  return new Promise((resolve,reject)=>{
-  if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(endpoint))return reject(new Error('網站尚未設定 Google 接單服務。'));
+  if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(endpoint)){
+   reject(lookupError('configuration','工坊尚未開放委託紀錄查閱，請聯絡店主。'));return;
+  }
   const cb='angulusLookup_'+Math.random().toString(36).slice(2);
-  const script=document.createElement('script');let done=false;
-  const timer=setTimeout(()=>finish(new Error('查詢逾時，請稍後再試。')),12000);
-  function finish(err,value){if(done)return;done=true;clearTimeout(timer);delete window[cb];script.remove();err?reject(err):resolve(value);}
-  window[cb]=v=>finish(null,v);
-  script.onerror=()=>finish(new Error('無法連上 Google 訂單查詢服務。'));
+  const script=document.createElement('script');let done=false;let timer;
+  function finish(err,value){
+   if(done)return;
+   done=true;clearTimeout(timer);delete window[cb];script.remove();
+   err?reject(err):resolve(value);
+  }
+  window[cb]=value=>finish(null,value);
+  script.onerror=()=>finish(lookupError('network','通往工坊紀錄庫的路途暫時受阻。請確認網路或更換 VPN 節點後重新查閱。'));
+  timer=setTimeout(()=>finish(lookupError('timeout','工坊紀錄庫的回音遲遲未至（已等候 30 秒）。委託紀錄不受影響，可再試一次或更換連線。')),LOOKUP_TIMEOUT_MS);
   script.src=endpoint+'?action=lookup&character='+encodeURIComponent(character)+'&queryCode='+encodeURIComponent(code)+'&callback='+encodeURIComponent(cb)+'&v='+Date.now();
   document.head.appendChild(script);
  });
@@ -59,15 +69,16 @@ document.addEventListener('DOMContentLoaded',()=>{
  q('lookup-form').addEventListener('submit',async e=>{
   e.preventDefault();if(active)return;
   const character=q('lookup-character').value.trim();const code=q('lookup-code').value.trim().toLowerCase();
-  if(!character||!/^[a-f0-9]{40}$/.test(code)){txt(q('lookup-status'),'請填寫角色名稱及 40 碼查詢碼。');return;}
-  active=true;q('lookup-submit').disabled=true;q('lookup-result').hidden=true;
+  if(!character||!/^[a-f0-9]{40}$/.test(code)){q('lookup-status').className='form-status error';txt(q('lookup-status'),'請備妥登記時的角色名稱與 40 碼委託密鑰，再查閱紀錄。');q('lookup-retry').hidden=true;return;}
+  active=true;q('lookup-submit').disabled=true;q('lookup-retry').hidden=true;q('lookup-result').hidden=true;
   txt(q('lookup-status'),'正在翻閱 Angulus 的委託紀錄，尋找您的訂單……');q('lookup-status').className='form-status';
   try{const res=await lookupOrder(character,code);
-   if(res?.found&&res.receipt){renderReceipt(res.receipt);txt(q('lookup-status'),'已找到訂單。');}
-   else{q('lookup-status').className='form-status error';txt(q('lookup-status'),res?.message||'查無符合的訂單，請檢查角色名稱與查詢碼。');}
-  }catch(err){q('lookup-status').className='form-status error';txt(q('lookup-status'),err.message);}
+   if(res?.found&&res.receipt){renderReceipt(res.receipt);txt(q('lookup-status'),'已尋得您的委託卷宗，收據與目前進度已呈列於下方。');}
+   else{q('lookup-status').className='form-status error';txt(q('lookup-status'),res?.message||'工坊卷宗中尚未尋得相符紀錄。請核對角色名稱與查閱密鑰，或向店主詢問。');}
+  }catch(err){q('lookup-status').className='form-status error';txt(q('lookup-status'),err.message);q('lookup-retry').hidden=!['timeout','network'].includes(err.kind);}
   finally{active=false;q('lookup-submit').disabled=false;}
  });
+ q('lookup-retry').addEventListener('click',()=>{if(!active)q('lookup-form').requestSubmit();});
  q('clear-order-history').addEventListener('click',()=>{if(!confirm('確定清除這部裝置保存的訂單查詢紀錄？清除後須自行輸入查詢碼。'))return;localStorage.removeItem(historyKey);renderHistory();});
  q('lookup-print').addEventListener('click',()=>window.print());
  renderHistory();

@@ -5,9 +5,9 @@
  <meta name="theme-color" content="#103b70"><meta name="robots" content="noindex,nofollow">
  <meta name="description" content="Angulus 訂單查詢｜使用角色名稱與訂單查詢碼查詢收據與訂單進度。">
  <title>訂單查詢｜Angulus</title>
- <link rel="stylesheet" href="styles.css?v=1.3.44">
- <script src="config.js?v=1.3.44" defer></script>
- <script src="order-lookup.js?v=1.3.46" defer></script>
+ <link rel="stylesheet" href="styles.css?v=1.3.51">
+ <script src="config.js?v=1.3.51" defer></script>
+ <script src="order-lookup.js?v=1.3.51" defer></script>
 </head>
 <body>
  <header class="site-header"><div class="header-inner wrap">
@@ -25,6 +25,7 @@
     <label for="lookup-code">訂單查詢碼 <span>*</span></label><input id="lookup-code" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40" minlength="40" pattern="[a-f0-9]{40}" required placeholder="下單完成後取得的 40 碼查詢碼">
     <button class="btn submit-btn" id="lookup-submit" type="submit">查詢訂單</button>
     <p class="form-status" id="lookup-status" role="status" aria-live="polite"></p>
+    <button type="button" class="lookup-retry" id="lookup-retry" hidden>重新翻閱委託紀錄</button>
    </form>
    <p class="lookup-hint">為妥善守護每位冒險者的委託紀錄，僅憑角色名稱無法查閱完整收據。訂單成立後將獲得專屬查詢碼，請妥善保管，以便日後再次查閱。</p>
   </section>
@@ -37,5 +38,5 @@
    <button type="button" class="lookup-print" id="lookup-print">列印／另存 PDF</button>
   </section>
  </div></main>
- <footer><div class="wrap footer-inner"><div><strong>Angulus</strong></div><p>在每個細節裡，收藏屬於你的冒險。</p><small>獨立玩家製作小舖 · <span class="release-version">v1.3.46</span></small></div></footer>
+ <footer><div class="wrap footer-inner"><div><strong>Angulus</strong></div><p>在每個細節裡，收藏屬於你的冒險。</p><small>獨立玩家製作小舖 · <span class="release-version">v1.3.51</span></small></div></footer>
 </body></html>
