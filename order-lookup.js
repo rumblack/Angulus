@@ -24,7 +24,7 @@ function renderReceipt(r){
  const commissions=q('r-commissions');commissions.replaceChildren();
  const hasCustom=Array.isArray(r.commissions)&&r.commissions.length>0;
  q('r-commission-block').hidden=!hasCustom;
- if(hasCustom)r.commissions.forEach(x=>appendLine(commissions,x.name,(x.type||'客製委託')+' · '+[x.equipmentType,x.job].filter(Boolean).join(' / ')+' · 數量 '+x.qty+' · '+x.status));
+ if(hasCustom)r.commissions.forEach(x=>appendLine(commissions,x.name,(x.type||'客製委託')+' · '+[x.equipmentType,x.job].filter(Boolean).join(' / ')+' · 數量 '+x.qty+' · '+x.status,x.subtotal===null||x.subtotal===undefined?undefined:x.subtotal));
  txt(q('r-quote'),r.finalQuote!==null&&r.finalQuote!==undefined?'店主最終報價：'+formatGil(r.finalQuote):(r.requiresQuote?'包含待報價項目，總額須等待店主確認。':'金額以店主確認為準。'));
  q('lookup-result').hidden=false;
  q('lookup-result').scrollIntoView({behavior:'smooth',block:'start'});
