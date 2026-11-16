@@ -30,6 +30,36 @@ const CEREMONY_FULL_SET_PRICE=500000;
 const isCeremonyFullSet=x=>x&&x.type==='裝備訂製'&&x.equipmentType==='戰鬥裝備'&&x.equipmentName==='典禮套裝（740）'&&x.equipmentSet==='整套';
 const pricedCommissionSubtotal=x=>isCeremonyFullSet(x)?CEREMONY_FULL_SET_PRICE*Number(x.quantity||0):null;
 let selectedEquipmentType='';let selectedEquipmentJob=null;let selectedEquipmentName='';let selectedEquipmentSet='';
+// 固定價套裝沿用一般商品的 ＋／− 互動，不要求另填數量和備註。
+function selectedFixedCeremony(){return selectedEquipmentType==='戰鬥裝備'&&selectedEquipmentJob&&selectedEquipmentName==='典禮套裝（740）'&&selectedEquipmentSet==='整套';}
+function fixedCeremonyIndex(){return custom.findIndex(x=>isCeremonyFullSet(x)&&x.equipmentJob===selectedEquipmentJob?.name);}
+function updateFixedEquipmentUI(){
+ const box=$('equipment-fixed-purchase'),fields=$('equipment-quote-fields');if(!box||!fields)return;
+ const show=!!selectedFixedCeremony();box.hidden=!show;fields.hidden=show;
+ if(!show)return;
+ const idx=fixedCeremonyIndex(),qty=idx<0?0:Number(custom[idx].quantity||0);
+ $('equipment-fixed-count').textContent=String(qty);
+ $('equipment-fixed-minus').disabled=qty<=0;
+ $('equipment-fixed-plus').disabled=qty>=99;
+}
+function adjustFixedCeremonyQuantity(delta){
+ if(!selectedFixedCeremony()||!Number.isInteger(delta))return;
+ const idx=fixedCeremonyIndex(),old=idx<0?0:Number(custom[idx].quantity||0);
+ const qty=Math.max(0,Math.min(99,old+delta));
+ if(qty===old)return;
+ if(qty===0){if(idx>=0)custom.splice(idx,1);}else if(idx>=0){
+  custom[idx].quantity=qty;
+  custom[idx].detail=`大類：戰鬥裝備\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：整套（主副手＋裝備五件套＋飾品）\n數量：${qty} 套\n固定售價：每套 500,000 Gil`;
+ }else{
+  custom.push({name:`【裝備訂製】典禮套裝（740）／整套｜${selectedEquipmentJob.name}`,
+   detail:`大類：戰鬥裝備\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：整套（主副手＋裝備五件套＋飾品）\n數量：${qty} 套\n固定售價：每套 500,000 Gil`,
+   type:'裝備訂製',equipmentType:'戰鬥裝備',equipmentJob:selectedEquipmentJob.name,
+   equipmentName:'典禮套裝（740）',equipmentSet:'整套',quantity:qty});
+ }
+ renderCart();updateFixedEquipmentUI();
+ const status=$('equipment-status');status.className='custom-status success';status.textContent=qty>0?`已將 ${qty} 套典禮套裝登記於右側委託書，合計 ${money(qty*CEREMONY_FULL_SET_PRICE)}。`:'典禮套裝已從委託書移除。';
+}
+
 function updateEquipmentSetChoices(){
  const field=$('equipment-set-field');
  if(!field)return;
@@ -39,6 +69,7 @@ function updateEquipmentSetChoices(){
   b.setAttribute('aria-pressed',String(show&&selectedEquipmentSet===b.dataset.equipmentSet));
  });
  $('equipment-set-hint').textContent=selectedEquipmentSet==='散件'?'請於下方「訂製需求」註明所需部位及件數。':selectedEquipmentSet==='整套'?(selectedEquipmentType==='戰鬥裝備'&&selectedEquipmentName==='典禮套裝（740）'?'典禮套裝整套固定售價：500,000 Gil／套（主副手＋裝備五件套＋飾品）。':'整套包含主副手、裝備五件套與飾品，將由店主確認報價。'):'請選擇「整套」或「散件」。';
+ updateFixedEquipmentUI();
 }
 function renderEquipmentNameOptions(){
  const holder=$('equipment-name-options');
@@ -70,7 +101,7 @@ function chooseEquipmentJob(abbr,name){
  selectedEquipmentJob={abbr,name};
  document.querySelectorAll('.equipment-job-btn').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.jobAbbr===abbr)));
  $('equipment-selection-summary').textContent=`已選擇：${selectedEquipmentType} ／ ${name}`;
- $('equipment-form').hidden=false;$('equipment-status').textContent='';
+ $('equipment-form').hidden=false;$('equipment-status').textContent='';updateFixedEquipmentUI();
 }
 try{const saved=JSON.parse(localStorage.getItem(localKey)||'{}');if(saved&&typeof saved==='object'){for(const p of products){const q=Number(saved[p.id]);if(Number.isInteger(q)&&q>0&&q<=99&&p.price!==null)cart[p.id]=q;}}}catch(e){}
 function save(){try{localStorage.setItem(localKey,JSON.stringify(cart));}catch(e){}}
@@ -86,11 +117,14 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
   updateEquipmentSetChoices();
   $('equipment-status').textContent='';
  }));
+ $('equipment-fixed-minus').addEventListener('click',()=>adjustFixedCeremonyQuantity(-1));
+ $('equipment-fixed-plus').addEventListener('click',()=>adjustFixedCeremonyQuantity(1));
  $('equipment-back-type').addEventListener('click',()=>{selectedEquipmentType='';selectedEquipmentJob=null;selectedEquipmentName='';selectedEquipmentSet='';updateEquipmentSetChoices();$('equipment-name-options').innerHTML='';$('equipment-job-step').hidden=true;$('equipment-form').hidden=true;document.querySelectorAll('[data-equipment-type]').forEach(b=>b.setAttribute('aria-pressed','false'));});
  $('equipment-back-job').addEventListener('click',()=>{selectedEquipmentJob=null;$('equipment-form').hidden=true;document.querySelectorAll('.equipment-job-btn').forEach(b=>b.setAttribute('aria-pressed','false'));});
  $('equipment-form').addEventListener('submit',e=>{
   e.preventDefault();
   const name=selectedEquipmentName;
+  if(selectedFixedCeremony())return; // 固定價套裝直接透過加減數量加入委託書。
   if(!selectedEquipmentType||!selectedEquipmentJob)return;
   const qty=Number($('equipment-qty').value);
   const details=$('equipment-details').value.trim();
@@ -130,12 +164,18 @@ function renderProducts(){
 }
 function renderCart(){
  const entries=products.filter(p=>cart[p.id]>0&&p.price!==null);
- const count=entries.reduce((n,p)=>n+cart[p.id],0)+custom.length;
+ const count=entries.reduce((n,p)=>n+cart[p.id],0)+custom.reduce((n,x)=>n+(pricedCommissionSubtotal(x)!==null?Number(x.quantity||0):1),0);
  $('nav-count').textContent=count;
  const html=entries.map(p=>`<div class="cart-line"><div><strong>${safe(p.name)}</strong><small>${money(p.price)} / 件</small></div><div class="cart-action"><strong>${money(p.price*cart[p.id])}</strong><div class="quantity-control" role="group" aria-label="${safe(p.name)}數量調整"><button class="quantity-btn" type="button" data-action="minus" data-id="${safe(p.id)}" aria-label="減少${safe(p.name)}數量">−</button><span class="quantity-value" aria-live="polite">${cart[p.id]}</span><button class="quantity-btn" type="button" data-action="plus" data-id="${safe(p.id)}" aria-label="增加${safe(p.name)}數量">＋</button></div></div></div>`).join('');
- const customHtml=custom.map((x,i)=>{const price=pricedCommissionSubtotal(x);return `<div class="cart-line"><div><strong>${safe(x.name)}</strong><small>${safe(x.detail.slice(0,60))}</small></div><div class="cart-action"><strong>${price===null?'待報價':money(price)}</strong><button type="button" class="remove" data-action="remove-custom" data-index="${i}">移除</button></div></div>`;}).join('');
+ const customHtml=custom.map((x,i)=>{const price=pricedCommissionSubtotal(x);const controls=price!==null?`<div class="quantity-control" role="group" aria-label="${safe(x.name)}數量調整"><button class="quantity-btn" type="button" data-action="fixed-minus" data-index="${i}" aria-label="減少數量">−</button><span class="quantity-value">${Number(x.quantity)||0}</span><button class="quantity-btn" type="button" data-action="fixed-plus" data-index="${i}" aria-label="增加數量" ${Number(x.quantity)>=99?'disabled':''}>＋</button></div>`:`<button type="button" class="remove" data-action="remove-custom" data-index="${i}">移除</button>`;return `<div class="cart-line"><div><strong>${safe(x.name)}</strong><small>${safe(x.detail.slice(0,60))}</small></div><div class="cart-action"><strong>${price===null?'待報價':money(price)}</strong>${controls}</div></div>`;}).join('');
  $('cart-items').innerHTML=html+customHtml||'<div class="empty-cart"><p>尚未選擇商品</p><small>請先從左側挑選商品<br>並將需要的項目加入訂單。</small></div>';
- $('cart-items').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.action;if(action==='remove-custom'){custom.splice(Number(b.dataset.index),1);}else{const id=b.dataset.id;cart[id]=Math.max(0,Math.min(99,(cart[id]||0)+(action==='plus'?1:-1)));if(!cart[id])delete cart[id];save();}renderCart();renderProducts();}));
+ $('cart-items').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.action;if(action==='remove-custom'){custom.splice(Number(b.dataset.index),1);}else if(action==='fixed-minus'||action==='fixed-plus'){
+  const idx=Number(b.dataset.index),item=custom[idx];if(!item||pricedCommissionSubtotal(item)===null)return;
+  const next=Math.max(0,Math.min(99,Number(item.quantity)+(action==='fixed-plus'?1:-1)));
+  if(next===0)custom.splice(idx,1);else{
+    item.quantity=next;item.detail=item.detail.replace(/數量：\d+ 套/,`數量：${next} 套`);
+  }
+ }else{const id=b.dataset.id;cart[id]=Math.max(0,Math.min(99,(cart[id]||0)+(action==='plus'?1:-1)));if(!cart[id])delete cart[id];save();}renderCart();renderProducts();updateFixedEquipmentUI();}));
  const regularTotal=entries.reduce((n,p)=>n+p.price*cart[p.id],0);
  const fixedEquipmentTotal=custom.reduce((sum,x)=>sum+(pricedCommissionSubtotal(x)||0),0);
  $('cart-total').textContent=money(regularTotal+fixedEquipmentTotal);

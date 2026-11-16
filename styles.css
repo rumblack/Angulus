@@ -484,3 +484,17 @@ main#home{padding-top:0}
 .equipment-set-choice[aria-pressed="true"] small{color:#f4e6cc}
 .equipment-set-choice:focus-visible{outline:3px solid #c5a16a;outline-offset:2px}
 @media(max-width:480px){.equipment-set-options{gap:7px}.equipment-set-choice{font-size:13px;padding:9px 7px;min-height:70px}.equipment-set-choice small{font-size:10px}}
+
+
+/* V1.3.55 — 固定價典禮套裝直接加減數量，不顯示報價用表單 */
+#equipment-fixed-purchase[hidden],#equipment-quote-fields[hidden]{display:none!important}
+#equipment-quote-fields{display:grid;gap:15px}
+.equipment-fixed-purchase{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:16px 18px;border:1px solid #cdb994;border-radius:7px;background:#fffaf0}
+.equipment-fixed-purchase>div:first-child{display:grid;gap:5px;color:#153e67}
+.equipment-fixed-purchase>div:first-child strong{font-size:14px}
+.equipment-fixed-purchase>div:first-child small{color:#7d6b53;font-size:11px}
+.equipment-fixed-price{font-size:19px!important;color:#164a7d}
+.equipment-fixed-purchase .product-qty{flex:none}
+.equipment-fixed-hint{flex-basis:100%;margin:0;color:#806b4d;font-size:12px;line-height:1.6}
+@media(max-width:540px){.equipment-fixed-purchase{padding:13px}.equipment-fixed-purchase>div:first-child{flex:1 1 170px}}
+#equipment-form[hidden]{display:none!important}
