@@ -157,7 +157,7 @@ function renderProducts(){
   const customItem=p.price===null;const qty=cart[p.id]||0;
   const action=customItem?`<button type="button" class="add-product" data-id="${safe(p.id)}">填寫委託需求</button>`:
    `<div class="product-purchase"><strong class="price">${money(p.price)}</strong><div class="product-qty" role="group" aria-label="${safe(p.name)}數量調整"><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="-1" aria-label="減少${safe(p.name)}數量" ${qty===0?'disabled':''}>−</button><span class="product-qty-value" aria-live="polite">${qty}</span><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="1" aria-label="增加${safe(p.name)}數量" ${qty===99?'disabled':''}>＋</button></div></div>`;
-  return `<article class="product-card"><div class="product-info"><small class="product-category">${safe(p.category||'精選商品')}</small><h3>${safe(p.name)}</h3><p>${safe(p.desc||'')}</p><div class="product-bottom">${customItem?'<strong class="price">另行報價</strong>':''}${action}</div></div></article>`;
+  return `<article class="product-card"><div class="product-info"><small class="product-category">${safe(p.category||'精選商品')}</small>${p.badge==='新品'?'<span class="product-new-badge">新品</span>':''}<h3>${safe(p.name)}</h3><p>${safe(p.desc||'')}</p><div class="product-bottom">${customItem?'<strong class="price">另行報價</strong>':''}${action}</div></div></article>`;
  }).join('')||'<p class="category-empty">目前沒有此分類商品，請稍後再查看。</p>';
  $('products').querySelectorAll('.product-qty-btn').forEach(b=>b.addEventListener('click',()=>changeQuantity(b.dataset.id,Number(b.dataset.delta))));
 
