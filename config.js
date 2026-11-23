@@ -10,7 +10,7 @@ window.SHOP_CONFIG = {
   orderBackend: 'google', // google: Google Sheets；formspree: 原有備援
   formEndpoint: 'https://formspree.io/f/xbgodgak', // 在 Formspree 建立表單後填入 https://formspree.io/f/xxxxxxxx ，空白時不能線上送單
   products: [
-    { id:'artificial-dark-matter-trio', name:'人造暗物質三件套', category:'常駐商品', price:20000, days:'依店主確認', badge:'新品', desc:'內含人造暗物質 α、β、γ 各一份。聽說幻境村的工匠們正需要這些材料，或許能為你的冒險派上用場。' },
+    { id:'artificial-dark-matter-trio', name:'人造暗物質三件套', category:'常駐商品', price:20000, days:'依店主確認', desc:'內含人造暗物質 α、β、γ 各一份。聽說幻境村的工匠們正需要這些材料，或許能為你的冒險派上用場。' },
     { id:'mountain-tea-999', name:'高山茶一組', category:'常駐商品', price:329000, days:'依店主確認', badge:'常駐', desc:'一組共 999 杯高山茶。前往舊薩雷安時，不妨多備一些——說不定當地的人們正需要這份暖心茶香。' },
     { id:'mate-cookies-99', name:'高級瑪黛茶餅乾', category:'常駐商品', price:69000, days:'依店主確認', badge:'常駐', desc:'一份共 99 塊高級瑪黛茶餅乾，香甜酥脆，是陪伴你踏上旅途、探索未知的最佳良伴。' },
     { id:'grade3-strength-potion-99', name:'3級剛力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'一組共 99 瓶。蘊含強化力量的藥效，為奮戰在前線的冒險者增添一份助力。' },
