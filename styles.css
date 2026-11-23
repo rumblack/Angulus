@@ -511,3 +511,6 @@ main#home{padding-top:0}
 }
 .product-card:has(.product-new-badge) .product-category{padding-right:60px}
 @media(max-width:450px){.product-info .product-new-badge{top:11px;right:11px}}
+
+/* V1.3.62: understated delivery-location reminder below notes */
+#checkout-form .delivery-note{display:block;margin-top:7px;color:#806a4c;font-size:12px;line-height:1.6;font-weight:400;}
