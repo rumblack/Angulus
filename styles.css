@@ -514,3 +514,8 @@ main#home{padding-top:0}
 
 /* V1.3.62: understated delivery-location reminder below notes */
 #checkout-form .delivery-note{display:block;margin-top:7px;color:#806a4c;font-size:12px;line-height:1.6;font-weight:400;}
+
+/* V1.3.65: 製作採集專屬第三個訂製方式 */
+.equipment-set-options:has([data-equipment-set="宇宙工具專用"]:not([hidden])){grid-template-columns:repeat(3,minmax(0,1fr))}
+.equipment-set-choice[hidden]{display:none!important}
+@media(max-width:560px){.equipment-set-options{gap:6px}.equipment-set-choice{min-height:74px;padding:8px 5px;font-size:12px}.equipment-set-choice small{font-size:10px}}

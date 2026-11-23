@@ -24,51 +24,60 @@ const equipmentJobs={
 };
 const equipmentNameOptions={
  '戰鬥裝備':['典禮套裝（740）','宮廷愛人（770/7.4）','其他'],
- '製作採集':['雀翎套裝（750/7.3）','其他']
+ '製作採集':['雀翎套裝＋金拇指工具組（750）','其他']
 };
-const CEREMONY_FULL_SET_PRICE=500000;
-const isCeremonyFullSet=x=>x&&x.type==='裝備訂製'&&x.equipmentType==='戰鬥裝備'&&x.equipmentName==='典禮套裝（740）'&&x.equipmentSet==='整套';
-const pricedCommissionSubtotal=x=>isCeremonyFullSet(x)?CEREMONY_FULL_SET_PRICE*Number(x.quantity||0):null;
+// 價格由「裝備大類＋裝備名稱＋訂製方式」決定，與 Google 後端對照。
+const FIXED_EQUIPMENT={
+ '戰鬥裝備|典禮套裝（740）|整套':{price:500000,description:'主副手＋裝備五件套＋飾品'},
+ '製作採集|雀翎套裝＋金拇指工具組（750）|整套':{price:1100000,description:'主副手＋裝備五件套＋飾品'},
+ '製作採集|雀翎套裝＋金拇指工具組（750）|宇宙工具專用':{price:1000000,description:'金拇指副工具一個＋雀翎套裝裝備飾品十件'}
+};
+const fixedSpec=(type,name,mode)=>FIXED_EQUIPMENT[`${type}|${name}|${mode}`]||null;
+const fixedSpecForItem=x=>x?.type==='裝備訂製'?fixedSpec(x.equipmentType,x.equipmentName,x.equipmentSet):null;
+const pricedCommissionSubtotal=x=>{const spec=fixedSpecForItem(x);return spec?spec.price*Number(x.quantity||0):null;};
 let selectedEquipmentType='';let selectedEquipmentJob=null;let selectedEquipmentName='';let selectedEquipmentSet='';
-// 固定價套裝沿用一般商品的 ＋／− 互動，不要求另填數量和備註。
-function selectedFixedCeremony(){return selectedEquipmentType==='戰鬥裝備'&&selectedEquipmentJob&&selectedEquipmentName==='典禮套裝（740）'&&selectedEquipmentSet==='整套';}
-function fixedCeremonyIndex(){return custom.findIndex(x=>isCeremonyFullSet(x)&&x.equipmentJob===selectedEquipmentJob?.name);}
+function selectedFixedEquipment(){return selectedEquipmentJob?fixedSpec(selectedEquipmentType,selectedEquipmentName,selectedEquipmentSet):null;}
+function selectedFixedEquipmentIndex(){return custom.findIndex(x=>x.equipmentJob===selectedEquipmentJob?.name&&x.equipmentType===selectedEquipmentType&&x.equipmentName===selectedEquipmentName&&x.equipmentSet===selectedEquipmentSet&&fixedSpecForItem(x));}
+function fixedEquipmentDetail(qty,spec){return `大類：${selectedEquipmentType}\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：${selectedEquipmentSet}（${spec.description}）\n數量：${qty} 套\n固定售價：每套 ${spec.price.toLocaleString('en-US')} Gil`;}
 function updateFixedEquipmentUI(){
  const box=$('equipment-fixed-purchase'),fields=$('equipment-quote-fields');if(!box||!fields)return;
- const show=!!selectedFixedCeremony();box.hidden=!show;fields.hidden=show;
- if(!show)return;
- const idx=fixedCeremonyIndex(),qty=idx<0?0:Number(custom[idx].quantity||0);
+ const spec=selectedFixedEquipment();box.hidden=!spec;fields.hidden=!!spec;
+ if(!spec)return;
+ $('equipment-fixed-name').textContent=`${selectedEquipmentName}｜${selectedEquipmentSet}`;
+ $('equipment-fixed-description').textContent=spec.description;
+ $('equipment-fixed-price').textContent=money(spec.price)+'／套';
+ $('equipment-fixed-quantity').setAttribute('aria-label',`${selectedEquipmentName} ${selectedEquipmentSet}數量調整`);
+ const idx=selectedFixedEquipmentIndex(),qty=idx<0?0:Number(custom[idx].quantity||0);
  $('equipment-fixed-count').textContent=String(qty);
  $('equipment-fixed-minus').disabled=qty<=0;
  $('equipment-fixed-plus').disabled=qty>=99;
 }
-function adjustFixedCeremonyQuantity(delta){
- if(!selectedFixedCeremony()||!Number.isInteger(delta))return;
- const idx=fixedCeremonyIndex(),old=idx<0?0:Number(custom[idx].quantity||0);
- const qty=Math.max(0,Math.min(99,old+delta));
- if(qty===old)return;
- if(qty===0){if(idx>=0)custom.splice(idx,1);}else if(idx>=0){
-  custom[idx].quantity=qty;
-  custom[idx].detail=`大類：戰鬥裝備\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：整套（主副手＋裝備五件套＋飾品）\n數量：${qty} 套\n固定售價：每套 500,000 Gil`;
- }else{
-  custom.push({name:`【裝備訂製】典禮套裝（740）／整套｜${selectedEquipmentJob.name}`,
-   detail:`大類：戰鬥裝備\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：整套（主副手＋裝備五件套＋飾品）\n數量：${qty} 套\n固定售價：每套 500,000 Gil`,
-   type:'裝備訂製',equipmentType:'戰鬥裝備',equipmentJob:selectedEquipmentJob.name,
-   equipmentName:'典禮套裝（740）',equipmentSet:'整套',quantity:qty});
- }
+function adjustFixedEquipmentQuantity(delta){
+ const spec=selectedFixedEquipment();if(!spec||!Number.isInteger(delta))return;
+ const idx=selectedFixedEquipmentIndex(),old=idx<0?0:Number(custom[idx].quantity||0);
+ const qty=Math.max(0,Math.min(99,old+delta));if(qty===old)return;
+ if(qty===0){if(idx>=0)custom.splice(idx,1);}
+ else if(idx>=0){custom[idx].quantity=qty;custom[idx].detail=fixedEquipmentDetail(qty,spec);}
+ else{custom.push({name:`【裝備訂製】${selectedEquipmentName}／${selectedEquipmentSet}｜${selectedEquipmentJob.name}`,
+  detail:fixedEquipmentDetail(qty,spec),type:'裝備訂製',equipmentType:selectedEquipmentType,
+  equipmentJob:selectedEquipmentJob.name,equipmentName:selectedEquipmentName,equipmentSet:selectedEquipmentSet,quantity:qty});}
  renderCart();updateFixedEquipmentUI();
- const status=$('equipment-status');status.className='custom-status success';status.textContent=qty>0?`已將 ${qty} 套典禮套裝登記於右側委託書，合計 ${money(qty*CEREMONY_FULL_SET_PRICE)}。`:'典禮套裝已從委託書移除。';
+ const status=$('equipment-status');status.className='custom-status success';
+ status.textContent=qty>0?`已將 ${qty} 套${selectedEquipmentName}（${selectedEquipmentSet}）登記於右側委託書，合計 ${money(qty*spec.price)}。`:'已從右側委託書移除此項套裝。';
 }
-
 function updateEquipmentSetChoices(){
- const field=$('equipment-set-field');
- if(!field)return;
- const show=!!selectedEquipmentName&&selectedEquipmentName!=='其他';
- field.hidden=!show;
+ const field=$('equipment-set-field');if(!field)return;
+ const show=!!selectedEquipmentName&&selectedEquipmentName!=='其他';field.hidden=!show;
+ const universe=selectedEquipmentType==='製作採集'&&selectedEquipmentName==='雀翎套裝＋金拇指工具組（750）';
  $('equipment-set-options').querySelectorAll('[data-equipment-set]').forEach(b=>{
-  b.setAttribute('aria-pressed',String(show&&selectedEquipmentSet===b.dataset.equipmentSet));
+  b.hidden=b.dataset.equipmentSet==='宇宙工具專用'&&!universe;
+  b.setAttribute('aria-pressed',String(show&&!b.hidden&&selectedEquipmentSet===b.dataset.equipmentSet));
  });
- $('equipment-set-hint').textContent=selectedEquipmentSet==='散件'?'請於下方「訂製需求」註明所需部位及件數。':selectedEquipmentSet==='整套'?(selectedEquipmentType==='戰鬥裝備'&&selectedEquipmentName==='典禮套裝（740）'?'典禮套裝整套固定售價：500,000 Gil／套（主副手＋裝備五件套＋飾品）。':'整套包含主副手、裝備五件套與飾品，將由店主確認報價。'):'請選擇「整套」或「散件」。';
+ const hint=$('equipment-set-hint');const spec=selectedFixedEquipment();
+ if(!selectedEquipmentSet)hint.textContent=universe?'請選擇「整套」、「宇宙工具專用」或「散件」。':'請選擇「整套」或「散件」。';
+ else if(spec)hint.textContent=`${selectedEquipmentSet}固定售價：${money(spec.price)}／套（${spec.description}）。`;
+ else if(selectedEquipmentSet==='散件')hint.textContent='請於下方「訂製需求」註明所需部位及件數。';
+ else hint.textContent='本項裝備將由店主確認需求後報價。';
  updateFixedEquipmentUI();
 }
 function renderEquipmentNameOptions(){
@@ -82,7 +91,7 @@ function renderEquipmentNameOptions(){
   selectedEquipmentSet='';
   holder.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
   updateEquipmentSetChoices();
-  $('equipment-name-hint').textContent=selectedEquipmentName==='其他'?'請在下方「訂製需求」中註明具體裝備名稱、等級及特殊要求。':`已選擇：${selectedEquipmentName}；請接著選擇整套或散件。`;
+  $('equipment-name-hint').textContent=selectedEquipmentName==='其他'?'請在下方「訂製需求」中註明具體裝備名稱、等級及特殊要求。':`已選擇：${selectedEquipmentName}；請接著選擇訂製方式。`;
   $('equipment-status').textContent='';
  }));
  $('equipment-name-hint').textContent='請選擇裝備名稱；選擇「其他」時，請在下方訂製需求中註明品項。';
@@ -117,23 +126,23 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
   updateEquipmentSetChoices();
   $('equipment-status').textContent='';
  }));
- $('equipment-fixed-minus').addEventListener('click',()=>adjustFixedCeremonyQuantity(-1));
- $('equipment-fixed-plus').addEventListener('click',()=>adjustFixedCeremonyQuantity(1));
+ $('equipment-fixed-minus').addEventListener('click',()=>adjustFixedEquipmentQuantity(-1));
+ $('equipment-fixed-plus').addEventListener('click',()=>adjustFixedEquipmentQuantity(1));
  $('equipment-back-type').addEventListener('click',()=>{selectedEquipmentType='';selectedEquipmentJob=null;selectedEquipmentName='';selectedEquipmentSet='';updateEquipmentSetChoices();$('equipment-name-options').innerHTML='';$('equipment-job-step').hidden=true;$('equipment-form').hidden=true;document.querySelectorAll('[data-equipment-type]').forEach(b=>b.setAttribute('aria-pressed','false'));});
  $('equipment-back-job').addEventListener('click',()=>{selectedEquipmentJob=null;$('equipment-form').hidden=true;document.querySelectorAll('.equipment-job-btn').forEach(b=>b.setAttribute('aria-pressed','false'));});
  $('equipment-form').addEventListener('submit',e=>{
   e.preventDefault();
   const name=selectedEquipmentName;
-  if(selectedFixedCeremony())return; // 固定價套裝直接透過加減數量加入委託書。
+  if(selectedFixedEquipment())return; // 固定價套裝直接透過加減數量加入委託書。
   if(!selectedEquipmentType||!selectedEquipmentJob)return;
   const qty=Number($('equipment-qty').value);
   const details=$('equipment-details').value.trim();
   const status=$('equipment-status');
   if(!name||(name!=='其他'&&!selectedEquipmentSet)||!Number.isInteger(qty)||qty<1||qty>99||details.length<5){
-   status.textContent='請確認裝備名稱、整套／散件選項（選「其他」可略過）、1–99 的訂製數量，以及至少 5 個字的需求說明。';
+   status.textContent='請確認裝備名稱、訂製方式（選「其他」可略過）、1–99 的訂製數量，以及至少 5 個字的需求說明。';
    status.className='custom-status error';return;
   }
-  const setLabel=name==='其他'?'其他（依需求）':selectedEquipmentSet==='整套'?'整套（主副手＋裝備五件套＋飾品）':'散件';
+  const setLabel=name==='其他'?'其他（依需求）':selectedEquipmentSet==='整套'?'整套（主副手＋裝備五件套＋飾品）':selectedEquipmentSet==='宇宙工具專用'?'宇宙工具專用（金拇指副工具一個＋雀翎套裝裝備飾品十件）':'散件';
   custom.push({name:'【裝備訂製】'+name+'／'+setLabel,detail:`大類：${selectedEquipmentType}\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：${setLabel}\n數量：${qty} ${selectedEquipmentSet==='整套'?'套':'件／份'}\n${details}`,type:'裝備訂製',equipmentType:selectedEquipmentType,equipmentJob:selectedEquipmentJob.name,equipmentName:name,equipmentSet:name==='其他'?'其他':selectedEquipmentSet,quantity:qty});
   $('equipment-form').reset();selectedEquipmentName='';selectedEquipmentSet='';renderEquipmentNameOptions();status.textContent=(selectedEquipmentType==='戰鬥裝備'&&name==='典禮套裝（740）'&&selectedEquipmentSet==='整套')?'典禮套裝整套已加入委託書，固定售價每套 500,000 Gil。':'裝備訂製已加入右側申請單，待店主報價。';status.className='custom-status success';renderCart();
  });
