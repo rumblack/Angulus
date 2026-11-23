@@ -28,9 +28,9 @@ const equipmentNameOptions={
 };
 // 價格由「裝備大類＋裝備名稱＋訂製方式」決定，與 Google 後端對照。
 const FIXED_EQUIPMENT={
- '戰鬥裝備|典禮套裝（740）|整套':{price:500000,description:'主副手＋裝備五件套＋飾品'},
- '製作採集|雀翎套裝＋金拇指工具組（750）|整套':{price:1100000,description:'主副手＋裝備五件套＋飾品'},
- '製作採集|雀翎套裝＋金拇指工具組（750）|宇宙工具專用':{price:1000000,description:'金拇指副工具一個＋雀翎套裝裝備飾品十件'}
+ '戰鬥裝備|典禮套裝（740）|整套':{price:500000,description:'主副手＋裝備飾品十件'},
+ '製作採集|雀翎套裝＋金拇指工具組（750）|整套':{price:1100000,description:'主副手＋裝備飾品十件'},
+ '製作採集|雀翎套裝＋金拇指工具組（750）|宇宙工具專用':{price:1000000,description:'金拇指副工具一個＋雀翎套裝備飾品十件'}
 };
 const fixedSpec=(type,name,mode)=>FIXED_EQUIPMENT[`${type}|${name}|${mode}`]||null;
 const fixedSpecForItem=x=>x?.type==='裝備訂製'?fixedSpec(x.equipmentType,x.equipmentName,x.equipmentSet):null;
@@ -142,7 +142,7 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
    status.textContent='請確認裝備名稱、訂製方式（選「其他」可略過）、1–99 的訂製數量，以及至少 5 個字的需求說明。';
    status.className='custom-status error';return;
   }
-  const setLabel=name==='其他'?'其他（依需求）':selectedEquipmentSet==='整套'?'整套（主副手＋裝備五件套＋飾品）':selectedEquipmentSet==='宇宙工具專用'?'宇宙工具專用（金拇指副工具一個＋雀翎套裝裝備飾品十件）':'散件';
+  const setLabel=name==='其他'?'其他（依需求）':selectedEquipmentSet==='整套'?'整套（主副手＋裝備飾品十件）':selectedEquipmentSet==='宇宙工具專用'?'宇宙工具專用（金拇指副工具一個＋雀翎套裝備飾品十件）':'散件';
   custom.push({name:'【裝備訂製】'+name+'／'+setLabel,detail:`大類：${selectedEquipmentType}\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：${setLabel}\n數量：${qty} ${selectedEquipmentSet==='整套'?'套':'件／份'}\n${details}`,type:'裝備訂製',equipmentType:selectedEquipmentType,equipmentJob:selectedEquipmentJob.name,equipmentName:name,equipmentSet:name==='其他'?'其他':selectedEquipmentSet,quantity:qty});
   $('equipment-form').reset();selectedEquipmentName='';selectedEquipmentSet='';renderEquipmentNameOptions();status.textContent=(selectedEquipmentType==='戰鬥裝備'&&name==='典禮套裝（740）'&&selectedEquipmentSet==='整套')?'典禮套裝整套已加入委託書，固定售價每套 500,000 Gil。':'裝備訂製已加入右側申請單，待店主報價。';status.className='custom-status success';renderCart();
  });
