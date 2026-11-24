@@ -63,6 +63,7 @@ function adjustFixedEquipmentQuantity(delta){
   equipmentJob:selectedEquipmentJob.name,equipmentName:selectedEquipmentName,equipmentSet:selectedEquipmentSet,quantity:qty});}
  renderCart();updateFixedEquipmentUI();
  const status=$('equipment-status');status.className='custom-status success';
+ if(delta>0)pulseMobileOrderBar();
  status.textContent=qty>0?`已將 ${qty} 套${selectedEquipmentName}（${selectedEquipmentSet}）登記於右側委託書，合計 ${money(qty*spec.price)}。`:'已從右側委託書移除此項套裝。';
 }
 function updateEquipmentSetChoices(){
@@ -114,6 +115,17 @@ function chooseEquipmentJob(abbr,name){
 }
 try{const saved=JSON.parse(localStorage.getItem(localKey)||'{}');if(saved&&typeof saved==='object'){for(const p of products){const q=Number(saved[p.id]);if(Number.isInteger(q)&&q>0&&q<=99&&p.price!==null)cart[p.id]=q;}}}catch(e){}
 function save(){try{localStorage.setItem(localKey,JSON.stringify(cart));}catch(e){}}
+function refreshMobileOrderBar(count,total){
+ const bar=$('mobile-order-bar');if(!bar)return;
+ bar.hidden=count<=0;
+ $('mobile-order-count').textContent=`已選 ${count} 項`;
+ $('mobile-order-total').textContent=money(total);
+}
+function pulseMobileOrderBar(){
+ const bar=$('mobile-order-bar');if(!bar||bar.hidden)return;
+ bar.classList.remove('is-pulsing');void bar.offsetWidth;bar.classList.add('is-pulsing');
+}
+
 function setup(){// Keep document.title from HTML head, matching Open Graph preview metadata.
  $('brand-name').textContent=config.name||'Angulus';$('footer-name').textContent=config.name||'Angulus';$('shop-notice').textContent=config.notice||'本店使用 FF14 遊戲內 Gil 計價。';if(config.contactUrl&&/^https:\/\//.test(config.contactUrl)){$('contact-link').href=config.contactUrl;$('contact-link').textContent=config.contactLabel||'聯絡店主';$('contact-link').hidden=false;}
  $('menu-toggle').addEventListener('click',()=>{const open=$('nav').classList.toggle('open');$('menu-toggle').setAttribute('aria-expanded',String(open));});document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',()=>{$('nav').classList.remove('open');$('menu-toggle').setAttribute('aria-expanded','false');}));document.querySelectorAll('a[href="#shop"]').forEach(a=>a.addEventListener('click',()=>selectCategory('常駐商品')));
@@ -157,16 +169,19 @@ function renderFilters(){
 function changeQuantity(id,delta){
  const p=products.find(x=>x.id===id);if(!p||p.price===null)return;
  const next=Math.max(0,Math.min(99,(cart[id]||0)+delta));if(next)cart[id]=next;else delete cart[id];
- save();renderProducts();renderCart();
+ save();renderProducts();renderCart();if(delta>0)pulseMobileOrderBar();
 }
 function renderProducts(){
  const customTab=currentCategory==='客製化委託';const equipmentTab=currentCategory==='裝備訂製';$('products').hidden=customTab||equipmentTab;$('commission').hidden=!customTab;$('equipment').hidden=!equipmentTab;$('products').setAttribute('aria-label',currentCategory);if(customTab||equipmentTab)return;
  const shown=products.filter(p=>p.price!==null&&categoryOf(p)===currentCategory);
  $('products').innerHTML=shown.map(p=>{
   const customItem=p.price===null;const qty=cart[p.id]||0;
+  const qtyMatch=String(p.desc||'').match(/(?:999|99|10|3)\s*(?:杯|塊|瓶|份|個)/);
+  const packLabel=p.id==='artificial-dark-matter-trio'?'<span class="pack-tag">每組 × 3 件</span>':(qtyMatch?`<span class="pack-tag">每組 × ${safe(qtyMatch[0].replace(/\s+/g,''))}</span>`:'');
+  const potionType=[[/剛力/,'strength'],[/智力/,'intelligence'],[/意力/,'mind'],[/巧力/,'dexterity']].find(([pattern])=>pattern.test(p.name));
   const action=customItem?`<button type="button" class="add-product" data-id="${safe(p.id)}">填寫委託需求</button>`:
    `<div class="product-purchase"><strong class="price">${money(p.price)}</strong><div class="product-qty" role="group" aria-label="${safe(p.name)}數量調整"><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="-1" aria-label="減少${safe(p.name)}數量" ${qty===0?'disabled':''}>−</button><span class="product-qty-value" aria-live="polite">${qty}</span><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="1" aria-label="增加${safe(p.name)}數量" ${qty===99?'disabled':''}>＋</button></div></div>`;
-  return `<article class="product-card"><div class="product-info"><small class="product-category">${safe(p.category||'精選商品')}</small>${p.badge==='新品'?'<span class="product-new-badge">新品</span>':''}<h3>${safe(p.name)}</h3><p>${safe(p.desc||'')}</p><div class="product-bottom">${customItem?'<strong class="price">另行報價</strong>':''}${action}</div></div></article>`;
+  return `<article class="product-card ${qty>0?'is-selected':''} ${potionType?'potion-'+potionType[1]:''}"><div class="product-info">${packLabel}<small class="product-category">${safe(p.category||'精選商品')}</small>${p.badge==='新品'?'<span class="product-new-badge">新品</span>':''}<h3>${safe(p.name)}</h3><p>${safe(p.desc||'')}</p><div class="product-bottom">${customItem?'<strong class="price">另行報價</strong>':''}${action}</div></div></article>`;
  }).join('')||'<p class="category-empty">目前沒有此分類商品，請稍後再查看。</p>';
  $('products').querySelectorAll('.product-qty-btn').forEach(b=>b.addEventListener('click',()=>changeQuantity(b.dataset.id,Number(b.dataset.delta))));
 
@@ -184,10 +199,11 @@ function renderCart(){
   if(next===0)custom.splice(idx,1);else{
     item.quantity=next;item.detail=item.detail.replace(/數量：\d+ 套/,`數量：${next} 套`);
   }
- }else{const id=b.dataset.id;cart[id]=Math.max(0,Math.min(99,(cart[id]||0)+(action==='plus'?1:-1)));if(!cart[id])delete cart[id];save();}renderCart();renderProducts();updateFixedEquipmentUI();}));
+ }else{const id=b.dataset.id;cart[id]=Math.max(0,Math.min(99,(cart[id]||0)+(action==='plus'?1:-1)));if(!cart[id])delete cart[id];save();}renderCart();renderProducts();updateFixedEquipmentUI();if(action==='plus'||action==='fixed-plus')pulseMobileOrderBar();}));
  const regularTotal=entries.reduce((n,p)=>n+p.price*cart[p.id],0);
  const fixedEquipmentTotal=custom.reduce((sum,x)=>sum+(pricedCommissionSubtotal(x)||0),0);
  $('cart-total').textContent=money(regularTotal+fixedEquipmentTotal);
+ refreshMobileOrderBar(count,regularTotal+fixedEquipmentTotal);
  $('quote-note').hidden=!custom.some(x=>pricedCommissionSubtotal(x)===null);
 }
 function orderData(){
@@ -197,7 +213,7 @@ function orderData(){
  const total=items.reduce((v,p)=>v+p.subtotal,0)+custom.reduce((v,p)=>v+(pricedCommissionSubtotal(p)||0),0);
  return {shop:config.name||'Angulus',character:String(fd.get('character')||'').trim(),server:String(fd.get('server')||'').trim(),contact:String(fd.get('contact')||'').trim(),deliveryDate:String(fd.get('deliveryDate')||''),deliveryTime:String(fd.get('deliveryTime')||'').trim(),notes:String(fd.get('notes')||'').trim(),items,custom,estimated_gil:total,requires_quote:custom.some(x=>pricedCommissionSubtotal(x)===null),created_at:new Date().toISOString()};
 }
-function orderText(d){return [`【${d.shop}】訂購申請`,`角色名稱：${d.character}`,`伺服器：${d.server}`,`聯絡方式：${d.contact}`,`希望交貨：${d.deliveryDate||'未填寫'}`,`方便時段：${d.deliveryTime||'未填寫'}`,'','【固定商品】',...d.items.map(p=>`${p.name} × ${p.qty}｜${money(p.subtotal)}`),'',`訂單小記：${money(d.estimated_gil)}`,...(d.requires_quote?['＊另含客製委託，總額待報價。']:[]),'','【客製委託】',...(d.custom.map((x,i)=>`${i+1}. ${x.name}\n${x.detail}`)),'','備註：'+(d.notes||'無'),'申請時間：'+d.created_at].join('\n');}
+function orderText(d){return [`【${d.shop}】訂購申請`,`角色名稱：${d.character}`,`伺服器：${d.server}`,`聯絡方式：${d.contact}`,`希望交貨：${d.deliveryDate||'未填寫'}`,`方便時段：${d.deliveryTime||'未填寫'}`,'','【固定商品】',...d.items.map(p=>`${p.name} × ${p.qty}｜${money(p.subtotal)}`),'',`訂單小計：${money(d.estimated_gil)}`,...(d.requires_quote?['＊另含客製委託，總額待報價。']:[]),'','【客製委託】',...(d.custom.map((x,i)=>`${i+1}. ${x.name}\n${x.detail}`)),'','備註：'+(d.notes||'無'),'申請時間：'+d.created_at].join('\n');}
 async function submitOrderFormspree(e){e.preventDefault();const s=$('form-status');s.className='form-status';if(!Object.keys(cart).length&&!custom.length){s.textContent='請先選擇商品或填寫客製委託。';s.classList.add('error');return;}const endpoint=String(config.formEndpoint||'').trim();if(!/^https:\/\/formspree\.io\/f\/[a-zA-Z0-9]+$/.test(endpoint)){s.classList.add('error');s.textContent='店主尚未設定線上收單服務，現階段無法送出。請聯絡店主；亦可先截圖訂單內容。';return;}const d=orderData();const button=$('submit-order');button.disabled=true;button.textContent='正在傳送訂單…';try{const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:d.character,email:d.contact.includes('@')?d.contact:undefined,character:d.character,server:d.server,contact:d.contact,deliveryDate:d.deliveryDate,deliveryTime:d.deliveryTime,message:orderText(d),order_json:JSON.stringify(d)})});if(!r.ok)throw Error('伺服器未接受此訂單（HTTP '+r.status+'）');s.textContent='訂單申請已傳送！請保留聯絡資訊並等候店主回覆。';cart={};custom=[];save();renderCart();renderProducts();$('checkout-form').reset();}catch(err){s.classList.add('error');s.textContent='送單失敗：'+err.message+'。商品仍留在訂購單中，請稍後再試。';}finally{button.disabled=false;button.textContent='送出訂購申請';}}
 document.addEventListener('DOMContentLoaded',setup);
 
