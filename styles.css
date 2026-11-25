@@ -645,3 +645,9 @@ body,button,input,select,textarea,.product-qty-btn,.quantity-btn,.footer-inner p
  .equipment-name-choice strong{font-size:12px}
  .equipment-name-choice small{font-size:11px}
 }
+
+/* V1.3.72 — checkout readiness and field-level validation */
+#checkout-form #submit-order:disabled{background:#7c858b!important;border-color:#aab0af!important;color:#f5f4f0!important;cursor:not-allowed;box-shadow:none!important;opacity:0.88}
+#checkout-form [aria-invalid="true"]{border:1px solid #b5483c!important;box-shadow:0 0 0 2px rgba(181,72,60,.12)!important;background:#fff8f4!important}
+#checkout-form .checkout-field-error{display:block;margin-top:5px;color:#a43229!important;font-size:12px!important;line-height:1.55;font-weight:500}
+#checkout-form label.agree:has([aria-invalid="true"]){border:1px solid #b5483c;border-radius:8px;padding:8px;background:#fff8f4}
