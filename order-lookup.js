@@ -23,7 +23,10 @@ function renderReceipt(r){
  const items=q('r-items');items.replaceChildren();
  if(r.items?.length){r.items.forEach(x=>appendLine(items,x.name+' × '+x.qty,x.category+' · '+formatGil(x.unitPrice)+' / 組',x.subtotal));}
  else appendLine(items,'沒有固定商品','此委託可能只有客製項目');
- setGil(q('r-total'),r.fixedSubtotal);
+ // V1.3.98: 收據的委託小計取訂單總表「訂單總額 Gil」，不是固定商品小計。
+ const total=r.orderTotal!==null&&r.orderTotal!==undefined&&Number.isFinite(Number(r.orderTotal))?
+  Number(r.orderTotal):(Number(r.fixedSubtotal)||0)+(Number(r.finalQuote)||0);
+ setGil(q('r-total'),total);
  const commissions=q('r-commissions');commissions.replaceChildren();
  const hasCustom=Array.isArray(r.commissions)&&r.commissions.length>0;
  q('r-commission-block').hidden=!hasCustom;
