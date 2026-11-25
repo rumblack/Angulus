@@ -742,3 +742,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .pay-chip{display:inline-block;align-self:flex-start;padding:2px 10px;border-radius:10px;font-size:13px;line-height:1.6}
 .pay-chip.is-paid{background:#e3efe6;color:#2f5f45}
 .pay-chip.is-due{background:#164a7d;color:#fff9ed}
+
+/* V1.3.86 — 收據操作按鈕統一 */
+.lookup-receipt .reorder-actions{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 4px}
+.lookup-receipt .reorder-actions .btn{flex:1 1 180px;min-height:44px;margin:0;padding:11px 18px;font-size:14px;border-radius:8px}
+.lookup-receipt .reorder-actions .lookup-print{display:inline-flex;align-items:center;justify-content:center;background:#f3e7cb;color:#3d2f23;border:1px solid #c7aa72}
+.lookup-receipt .reorder-actions .lookup-print:hover{background:#ecdcb8}
+.lookup-receipt .reorder-note{flex-basis:100%}
+.lookup-receipt .reorder-note:empty{display:none}
