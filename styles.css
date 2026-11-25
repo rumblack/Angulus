@@ -651,3 +651,8 @@ body,button,input,select,textarea,.product-qty-btn,.quantity-btn,.footer-inner p
 #checkout-form [aria-invalid="true"]{border:1px solid #b5483c!important;box-shadow:0 0 0 2px rgba(181,72,60,.12)!important;background:#fff8f4!important}
 #checkout-form .checkout-field-error{display:block;margin-top:5px;color:#a43229!important;font-size:12px!important;line-height:1.55;font-weight:500}
 #checkout-form label.agree:has([aria-invalid="true"]){border:1px solid #b5483c;border-radius:8px;padding:8px;background:#fff8f4}
+
+/* V1.3.73 — agreement error wrapping and disabled submit hover */
+#checkout-form label.agree{flex-wrap:wrap}
+#checkout-form label.agree .checkout-field-error{flex-basis:100%;margin-top:4px;padding-left:20px}
+#checkout-form #submit-order:disabled:hover{transform:none;box-shadow:none!important}
