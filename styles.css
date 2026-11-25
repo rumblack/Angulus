@@ -611,3 +611,39 @@ body,button,input,select,textarea,.product-qty-btn,.quantity-btn,.footer-inner p
 /* V1.3.68 — Store information motto; preserve compact desktop layout. */
 .shop-location-motto{font:500 12px/1.6 'Noto Sans TC',sans-serif;color:#F0D8B2;letter-spacing:.06em;padding-bottom:10px;text-align:center}
 @media(max-width:760px){.shop-location-motto{padding-top:5px;padding-bottom:12px}}
+
+
+/* V1.3.69 — equipment steps, consistent selections, responsive details */
+.equipment-category-step[hidden],.equipment-step-summary[hidden],.equipment-job-step[hidden],#equipment-form[hidden],#equipment-fixed-add[hidden],#equipment-fixed-quantity[hidden],.equipment-name-hint[hidden]{display:none!important}
+.equipment-step-summary{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:58px;border:1px solid #d6c5a7;background:#faf7f0;border-radius:8px;padding:10px 14px;margin:12px 0;color:#153e67}
+.equipment-summary-label{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;line-height:1.5}
+.equipment-summary-label strong{font-weight:700;font-size:14px}
+.equipment-step-summary .equipment-step-number{width:26px;height:26px;flex:none}
+.equipment-edit{flex:none;min-height:34px;padding:5px 14px;border:1px solid #bb9b69;border-radius:8px;background:#fffaf1;color:#164a7d;font-weight:700;cursor:pointer}
+.equipment-edit:hover{background:#edf4fb;border-color:#164a7d}
+.equipment-edit:focus-visible{outline:3px solid #d3aa6b;outline-offset:2px}
+.equipment-type-btn[aria-pressed="true"]{border:2px solid #164a7d!important;background:#f0f5fa!important;position:relative;transform:none;box-shadow:inset 0 0 0 1px #164a7d1c}
+.equipment-type-btn[aria-pressed="true"]::after{content:"✓";position:absolute;top:8px;right:9px;display:grid;place-items:center;width:22px;height:22px;background:#164a7d;color:white;font:700 13px 'Noto Sans TC',sans-serif;border-radius:50%}
+.equipment-type-btn[aria-pressed="true"] .equipment-type-identity .ui-icon{color:#164a7d}
+.equipment-type-btn .equipment-type-description{font-size:13px!important;line-height:1.65}
+.equipment-job-btn[aria-pressed="true"],.equipment-job-btn[aria-pressed="true"]:has(.job-icon-img){border:2px solid #164a7d!important;background:#dfedf9!important;box-shadow:0 0 0 2px #b6d3ed;transform:none}
+.equipment-name-choice{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px}
+.equipment-name-choice strong{font-weight:700;font-size:13px;line-height:1.3}
+.equipment-name-choice small{font-size:12px;line-height:1.3;color:#69777b}
+.equipment-name-choice[aria-pressed="true"] small{color:#e3edf6}
+.equipment-fixed-purchase .equipment-fixed-add{flex:none;min-height:42px;font-size:13px;padding:10px 14px}
+.equipment-fixed-purchase .product-qty[hidden]{display:none!important}
+.equipment-fixed-purchase .product-qty{margin-left:auto}
+#equipment-form{gap:13px}
+#equipment-form .equipment-name-hint[hidden]{display:none!important}
+@media(max-width:540px){
+ .equipment-type-grid{grid-template-columns:1fr}
+ .equipment-type-grid .equipment-type-btn{height:76px;min-height:76px;display:flex;flex-direction:row;align-items:center;justify-content:center;padding:12px}
+ .equipment-type-btn .equipment-type-identity{flex-direction:row;align-items:center;gap:10px}
+ .equipment-type-btn .equipment-type-identity .ui-icon{width:20px;height:20px}
+ .equipment-type-btn .equipment-type-description{display:none!important}
+ .equipment-step-summary{padding:8px 11px;min-height:54px}
+ .equipment-fixed-purchase .equipment-fixed-add{width:100%}
+ .equipment-name-choice strong{font-size:12px}
+ .equipment-name-choice small{font-size:11px}
+}
