@@ -210,7 +210,7 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
   custom.push({name:'【裝備訂製】'+name+'／'+setLabel,detail:`大類：${selectedEquipmentType}\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：${setLabel}\n數量：${qty} ${selectedEquipmentSet==='整套'?'套':'件／份'}\n${details}`,type:'裝備訂製',equipmentType:selectedEquipmentType,equipmentJob:selectedEquipmentJob.name,equipmentName:name,equipmentSet:name==='其他'?'其他':selectedEquipmentSet,quantity:qty});
   $('equipment-form').reset();selectedEquipmentName='';selectedEquipmentSet='';renderEquipmentNameOptions();status.textContent='裝備訂製已加入訂購申請單，待店主報價。';status.className='custom-status success';renderCart();
  });
- $('checkout-form').addEventListener('submit',submitOrder);$('checkout-form').addEventListener('input',e=>{if(e.target.matches('input,select,textarea'))clearCheckoutFieldError(e.target);});$('checkout-form').addEventListener('change',e=>{if(e.target.matches('input,select,textarea'))clearCheckoutFieldError(e.target);});initializePendingRecovery();if(location.hash==='#commission')currentCategory='客製化委託';renderFilters();renderProducts();renderCart();}
+ initializeCheckoutEnhancements();$('checkout-form').addEventListener('submit',submitOrder);$('checkout-form').addEventListener('input',e=>{if(e.target.matches('input,select,textarea'))clearCheckoutFieldError(e.target);});$('checkout-form').addEventListener('change',e=>{if(e.target.matches('input,select,textarea'))clearCheckoutFieldError(e.target);});initializePendingRecovery();if(location.hash==='#commission')currentCategory='客製化委託';renderFilters();renderProducts();renderCart();}
 function categories(){return shopTabs;}
 function categoryOf(p){if(p.price===null)return '客製化委託';const c=p.shopCategory||p.category;return shopTabs.includes(c)?c:'常駐商品';}
 function selectCategory(c){if(!shopTabs.includes(c))return;currentCategory=c;renderFilters();renderProducts();}
@@ -409,9 +409,84 @@ function submitOrder(e){
  e.preventDefault();
  if(!hasOrderItems()){refreshCheckoutButton();return;}
  if(!validateCheckoutFields())return;
- if(config.orderBackend==='formspree')return submitOrderFormspree(e);
- return submitOrderGoogle(e);
+ const dialog=$('order-confirm-dialog');
+ renderConfirmation(orderData());
+ if(dialog&&!dialog.open)dialog.showModal();
 }
+function confirmedSubmit(){
+ if(googleSubmitting||checkoutBusy)return;
+ const dialog=$('order-confirm-dialog');
+ if(!hasOrderItems()||!validateCheckoutFields()){dialog?.close();refreshCheckoutButton();return;}
+ dialog?.close();
+ const form=$('checkout-form');
+ // 前端防灌單僅用來攔下自動填滿機器人的常見操作，不能取代後端防護。
+ if(String(form.elements.namedItem('website')?.value||'').trim()){
+  const status=$('form-status');status.className='form-status success';status.textContent='已送出';return;
+ }
+ saveCustomerPreference();
+ if(config.orderBackend==='formspree')return submitOrderFormspree(new Event('submit'));
+ return submitOrderGoogle(new Event('submit'));
+}
+const CUSTOMER_KEY='angulus-customer-details-v1';
+const REORDER_KEY='angulus-reorder-v1';
+function todayLocalISO(){const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
+function loadCustomerPreference(){
+ try{
+  const data=JSON.parse(localStorage.getItem(CUSTOMER_KEY)||'null');
+  if(!data||typeof data!=='object')return;
+  const form=$('checkout-form');
+  ['character','server','contact'].forEach(key=>{const field=form.elements.namedItem(key);if(field&&typeof data[key]==='string')field.value=data[key].slice(0,120);});
+  form.elements.namedItem('rememberCustomer').checked=true;
+ }catch(e){}
+}
+function saveCustomerPreference(){
+ try{
+  const form=$('checkout-form');
+  if(!form.elements.namedItem('rememberCustomer').checked){localStorage.removeItem(CUSTOMER_KEY);return;}
+  localStorage.setItem(CUSTOMER_KEY,JSON.stringify({character:form.elements.namedItem('character').value.trim(),server:form.elements.namedItem('server').value,contact:form.elements.namedItem('contact').value.trim()}));
+ }catch(e){}
+}
+function appendConfirmRow(parent,title,value){
+ const row=document.createElement('div');row.className='confirm-row';
+ const name=document.createElement('span');name.textContent=title;
+ const text=document.createElement('strong');text.textContent=String(value||'未填寫');
+ row.append(name,text);parent.appendChild(row);
+}
+function renderConfirmation(data){
+ const target=$('order-confirm-details');target.replaceChildren();
+ const heading=document.createElement('h3');heading.textContent='選購內容';target.appendChild(heading);
+ const entries=[...data.items.map(x=>({name:x.name,qty:x.qty,price:x.subtotal})),...data.custom.map(x=>({name:x.name,qty:Math.max(1,Number(x.quantity)||1),price:pricedCommissionSubtotal(x)}))];
+ entries.forEach(x=>appendConfirmRow(target,`${x.name} × ${x.qty}`,x.price===null?'待報價':money(x.price)));
+ appendConfirmRow(target,'固定商品及固定價套裝小計',money(data.estimated_gil));
+ if(data.requires_quote)appendConfirmRow(target,'其他委託','含待報價項目，最終金額以店主確認為準');
+ const personal=document.createElement('h3');personal.textContent='訂購人資訊';target.appendChild(personal);
+ [['角色名稱',data.character],['所屬伺服器',data.server],['聯絡方式',data.contact],['希望交貨日期',data.deliveryDate],['方便交易時段',data.deliveryTime]].forEach(([k,v])=>appendConfirmRow(target,k,v));
+}
+function applyReorderFromReceipt(){
+ let request=null;try{request=JSON.parse(localStorage.getItem(REORDER_KEY)||'null');localStorage.removeItem(REORDER_KEY);}catch(e){}
+ if(!request||!Array.isArray(request.items))return;
+ const missing=[],changed=[];
+ for(const line of request.items.slice(0,30)){
+  const matching=products.find(p=>p.price!==null&&p.name===line.name&&p.category===line.category&&Number(p.price)===Number(line.unitPrice));
+  const renamed=matching||products.find(p=>p.price!==null&&p.name===line.name&&p.category===line.category);
+  if(!renamed){missing.push(String(line.name||'未知品項'));continue;}
+  if(!matching)changed.push(renamed.name);
+  const qty=Math.min(99,Math.max(0,Number.parseInt(line.qty,10)||0));
+  if(qty>0)cart[renamed.id]=Math.min(99,(cart[renamed.id]||0)+qty);
+ }
+ save();renderProducts();renderCart();
+ const notices=[];if(changed.length)notices.push('部分商品價格已更新，已按目前網站售價重新計算：'+[...new Set(changed)].join('、'));
+ if(missing.length)notices.push('下列舊商品已無法加入：'+[...new Set(missing)].join('、'));
+ if(request.hasCommissions)notices.push('裝備訂製及客製委託無法自動帶入，請重新填寫需求。');
+ const status=$('form-status');status.className='form-status';status.textContent=notices.length?'已帶入可訂購商品。'+notices.join('；'):'已從舊收據帶入商品，請核對數量與目前價格。';
+}
+function initializeCheckoutEnhancements(){
+ const date=$('checkout-form').elements.namedItem('deliveryDate');if(date){date.min=todayLocalISO();date.addEventListener('focus',()=>{date.min=todayLocalISO();});}
+ loadCustomerPreference();applyReorderFromReceipt();
+ $('confirm-back').addEventListener('click',()=>$('order-confirm-dialog').close());
+ $('confirm-send').addEventListener('click',confirmedSubmit);
+}
+
 
 
 // V1.3.75 — 品牌價格呈現、空白申請單與輕量動態回饋。

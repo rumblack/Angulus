@@ -4,6 +4,7 @@ const formatGil=v=>new Intl.NumberFormat('en-US').format(Number(v)||0)+' Gil';
 const historyKey='angulus-order-history-v1';
 const endpoint=String(window.SHOP_CONFIG?.googleScriptUrl||'');
 let active=false;
+let currentReceipt=null;
 function txt(node,value){node.textContent=String(value??'');}
 function appendLine(parent,title,detail,price){
  const row=document.createElement('div');row.className='receipt-line';
@@ -14,6 +15,7 @@ function appendLine(parent,title,detail,price){
  parent.appendChild(row);
 }
 function renderReceipt(r){
+ currentReceipt=r;
  txt(q('r-id'),r.orderId);txt(q('r-character'),r.character);txt(q('r-server'),r.server);
  txt(q('r-date'),r.createdAt);txt(q('r-status'),r.status);txt(q('r-payment'),r.paymentStatus);
  q('r-status').dataset.state=String(r.status||'');
@@ -81,6 +83,14 @@ document.addEventListener('DOMContentLoaded',()=>{
  });
  q('lookup-retry').addEventListener('click',()=>{if(!active)q('lookup-form').requestSubmit();});
  q('clear-order-history').addEventListener('click',()=>{if(!confirm('確定清除這部裝置保存的訂單查詢紀錄？清除後須自行輸入查詢碼。'))return;localStorage.removeItem(historyKey);renderHistory();});
+ q('lookup-reorder').addEventListener('click',()=>{
+  const r=currentReceipt;if(!r)return;
+  const items=(Array.isArray(r.items)?r.items:[]).map(x=>({name:String(x.name||''),category:String(x.category||''),unitPrice:Number(x.unitPrice),qty:Number(x.qty)}));
+  const hasCommissions=Array.isArray(r.commissions)&&r.commissions.length>0;
+  try{localStorage.setItem('angulus-reorder-v1',JSON.stringify({items,hasCommissions}));}
+  catch(e){txt(q('lookup-reorder-note'),'無法儲存再訂內容，請確認瀏覽器允許使用本機儲存空間。');return;}
+  location.href='index.html#order';
+ });
  q('lookup-print').addEventListener('click',()=>window.print());
  renderHistory();
 });
