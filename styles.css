@@ -3754,7 +3754,7 @@ body,button,input,select,textarea,.product-qty-btn,.quantity-btn,.footer-inner p
   gap: 15px;
 }
 
-.product-grid>.product-card:last-child:nth-child(odd) {
+.product-grid>.product-card:first-child:nth-last-child(odd) {
   grid-column: 1/-1;
 }
 
@@ -3952,7 +3952,7 @@ body,button,input,select,textarea,.product-qty-btn,.quantity-btn,.footer-inner p
     outline-offset: 2px;
   }
 
-  .product-grid>.product-card:last-child:nth-child(odd) {
+  .product-grid>.product-card:first-child:nth-last-child(odd) {
     grid-column: 1/-1;
   }
 }
@@ -3962,7 +3962,7 @@ body,button,input,select,textarea,.product-qty-btn,.quantity-btn,.footer-inner p
     grid-template-columns: 1fr !important;
   }
 
-  .product-grid>.product-card:last-child:nth-child(odd) {
+  .product-grid>.product-card:first-child:nth-last-child(odd) {
     grid-column: auto;
   }
 

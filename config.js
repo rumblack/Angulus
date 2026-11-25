@@ -15,8 +15,8 @@ window.SHOP_CONFIG = {
     '雀翎套裝＋金拇指工具組（750）': { name: '雀翎＋金拇指工具組', note: '品級 750' }
   },
   products: [
-    { id:'artificial-dark-matter-trio', pack:'3 件', name:'人造暗物質三件套', category:'常駐商品', price:20000, days:'依店主確認', desc:'內含人造暗物質 α、β、γ 各一份。聽說幻境村的工匠們正需要這些材料，或許能為你的冒險派上用場。' },
     { id:'mountain-tea-999', pack:'999 杯', name:'高山茶一組', category:'常駐商品', price:329000, days:'依店主確認', badge:'常駐', desc:'前往舊薩雷安時，不妨多備一些——說不定當地的人們正需要這份暖心茶香。' },
+    { id:'artificial-dark-matter-trio', pack:'3 件', name:'人造暗物質三件套', category:'常駐商品', price:20000, days:'依店主確認', desc:'內含人造暗物質 α、β、γ 各一份。聽說幻境村的工匠們正需要這些材料，或許能為你的冒險派上用場。' },
     { id:'mate-cookies-99', pack:'99 塊', name:'高級瑪黛茶餅乾', category:'常駐商品', price:69000, days:'依店主確認', badge:'常駐', desc:'香甜酥脆，是陪伴你踏上旅途、探索未知的最佳良伴。' },
     { id:'grade3-strength-potion-99', pack:'99 瓶', name:'3級剛力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'蘊含強化力量的藥效，為奮戰在前線的冒險者增添一份助力。' },
     { id:'grade3-intelligence-potion-99', pack:'99 瓶', name:'3級智力之寶藥', category:'常駐商品', price:128000, days:'依店主確認', badge:'常駐', desc:'能夠提升智力的寶藥，為施展法術與迎接挑戰做好準備。' },
