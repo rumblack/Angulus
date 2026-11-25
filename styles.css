@@ -609,8 +609,6 @@ body,button,input,select,textarea,.product-qty-btn,.quantity-btn,.footer-inner p
 @media(prefers-reduced-motion:reduce){.mobile-order-bar.is-pulsing{animation:none;border-top-width:4px}}
 
 /* V1.3.68 — Store information motto; preserve compact desktop layout. */
-.shop-location-motto{font:500 12px/1.6 'Noto Sans TC',sans-serif;color:#F0D8B2;letter-spacing:.06em;padding-bottom:10px;text-align:center}
-@media(max-width:760px){.shop-location-motto{padding-top:5px;padding-bottom:12px}}
 
 
 /* V1.3.69 — equipment steps, consistent selections, responsive details */

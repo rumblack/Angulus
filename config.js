@@ -8,6 +8,12 @@ window.SHOP_CONFIG = {
   googleScriptUrl: 'https://script.google.com/macros/s/AKfycbw9wIt64Onps7LeJGWG2ccVwRzA3BrX2bnSW6ydkGC_OrGfbeqHMU8Db1abA--dNGwS/exec', // 貼上 Apps Script 網頁應用程式 /exec 網址，啟用 Google 試算表接單
   orderBackend: 'google', // google: Google Sheets；formspree: 原有備援
   formEndpoint: 'https://formspree.io/f/xbgodgak', // 在 Formspree 建立表單後填入 https://formspree.io/f/xxxxxxxx ，空白時不能線上送單
+  // 裝備顯示文字：key 必須與網站原有裝備名稱一致，以保留 Google 後端固定價識別。
+  equipmentDisplay: {
+    '典禮套裝（740）': { name: '典禮套裝', note: '品級 740' },
+    '宮廷愛人（770/7.4）': { name: '宮廷愛人', note: '品級 770・7.4' },
+    '雀翎套裝＋金拇指工具組（750）': { name: '雀翎＋金拇指工具組', note: '品級 750' }
+  },
   products: [
     { id:'artificial-dark-matter-trio', pack:'3 件', name:'人造暗物質三件套', category:'常駐商品', price:20000, days:'依店主確認', desc:'內含人造暗物質 α、β、γ 各一份。聽說幻境村的工匠們正需要這些材料，或許能為你的冒險派上用場。' },
     { id:'mountain-tea-999', pack:'999 杯', name:'高山茶一組', category:'常駐商品', price:329000, days:'依店主確認', badge:'常駐', desc:'一組共 999 杯高山茶。前往舊薩雷安時，不妨多備一些——說不定當地的人們正需要這份暖心茶香。' },
