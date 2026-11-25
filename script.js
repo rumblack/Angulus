@@ -2,6 +2,7 @@
 const config=window.SHOP_CONFIG||{};
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n)+' Gil';
+const moneyHtml=n=>new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(n)+'<span class="gil">Gil</span>';
 const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const products=Array.isArray(config.products)?config.products.filter(p=>p&&p.id&&p.name):[];
 const localKey='sapphire-atelier-cart-v1';
@@ -45,7 +46,7 @@ function updateFixedEquipmentUI(){
  if(!spec)return;
  $('equipment-fixed-name').textContent=`${(config.equipmentDisplay?.[selectedEquipmentName]?.name||selectedEquipmentName.replace(/（[^）]*）$/, ''))}｜${selectedEquipmentSet}`;
  $('equipment-fixed-description').textContent=spec.description;
- $('equipment-fixed-price').textContent=money(spec.price)+'／套';
+ $('equipment-fixed-price').innerHTML=moneyHtml(spec.price)+'<span class="price-per-set">／套</span>';
  $('equipment-fixed-quantity').setAttribute('aria-label',`${selectedEquipmentName} ${selectedEquipmentSet}數量調整`);
  const idx=selectedFixedEquipmentIndex(),qty=idx<0?0:Number(custom[idx].quantity||0);
  $('equipment-fixed-count').textContent=String(qty);
@@ -230,10 +231,11 @@ function renderProducts(){
   const packLabel=p.pack?`<span class="pack-tag">每組 × ${safe(p.pack)}</span>`:'';
   const potionType=[[/剛力/,'strength'],[/智力/,'intelligence'],[/意力/,'mind'],[/巧力/,'dexterity']].find(([pattern])=>pattern.test(p.name));
   const action=customItem?`<button type="button" class="add-product" data-id="${safe(p.id)}">填寫委託需求</button>`:
-   `<div class="product-purchase"><strong class="price">${money(p.price)}</strong><div class="product-qty" role="group" aria-label="${safe(p.name)}數量調整"><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="-1" aria-label="減少${safe(p.name)}數量" ${qty===0?'disabled':''}>−</button><span class="product-qty-value" aria-live="polite">${qty}</span><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="1" aria-label="增加${safe(p.name)}數量" ${qty===99?'disabled':''}>＋</button></div></div>`;
+   `<div class="product-purchase"><strong class="price">${moneyHtml(p.price)}</strong><div class="product-qty" role="group" aria-label="${safe(p.name)}數量調整"><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="-1" aria-label="減少${safe(p.name)}數量" ${qty===0?'disabled':''}>−</button><span class="product-qty-value" aria-live="polite">${qty}</span><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="1" aria-label="增加${safe(p.name)}數量" ${qty===99?'disabled':''}>＋</button></div></div>`;
   return `<article class="product-card ${qty>0?'is-selected':''} ${potionType?'potion-'+potionType[1]:''}"><div class="product-info">${packLabel}<small class="product-category">${safe(p.category||'精選商品')}</small>${p.badge==='新品'?'<span class="product-new-badge">新品</span>':''}<h3>${safe(p.name)}</h3><p>${safe(p.desc||'')}</p><div class="product-bottom">${customItem?'<strong class="price">另行報價</strong>':''}${action}</div></div></article>`;
  }).join('')||'<p class="category-empty">目前沒有此分類商品，請稍後再查看。</p>';
  $('products').querySelectorAll('.product-qty-btn').forEach(b=>b.addEventListener('click',()=>changeQuantity(b.dataset.id,Number(b.dataset.delta))));
+ bumpChangedQuantities();
 
 }
 function renderCart(){
@@ -242,7 +244,7 @@ function renderCart(){
  $('nav-count').textContent=count;
  const html=entries.map(p=>`<div class="cart-line"><div><strong>${safe(p.name)}</strong><small>${money(p.price)} / 件</small></div><div class="cart-action"><strong>${money(p.price*cart[p.id])}</strong><div class="quantity-control" role="group" aria-label="${safe(p.name)}數量調整"><button class="quantity-btn" type="button" data-action="minus" data-id="${safe(p.id)}" aria-label="減少${safe(p.name)}數量">−</button><span class="quantity-value" aria-live="polite">${cart[p.id]}</span><button class="quantity-btn" type="button" data-action="plus" data-id="${safe(p.id)}" aria-label="增加${safe(p.name)}數量">＋</button></div></div></div>`).join('');
  const customHtml=custom.map((x,i)=>{const price=pricedCommissionSubtotal(x);const controls=price!==null?`<div class="quantity-control" role="group" aria-label="${safe(x.name)}數量調整"><button class="quantity-btn" type="button" data-action="fixed-minus" data-index="${i}" aria-label="減少數量">−</button><span class="quantity-value">${Number(x.quantity)||0}</span><button class="quantity-btn" type="button" data-action="fixed-plus" data-index="${i}" aria-label="增加數量" ${Number(x.quantity)>=99?'disabled':''}>＋</button></div>`:`<button type="button" class="remove" data-action="remove-custom" data-index="${i}">移除</button>`;return `<div class="cart-line"><div><strong>${safe(x.name)}</strong><small>${safe(x.detail.slice(0,60))}</small></div><div class="cart-action"><strong>${price===null?'待報價':money(price)}</strong>${controls}</div></div>`;}).join('');
- $('cart-items').innerHTML=html+customHtml||'<div class="empty-cart"><p>尚未選擇商品</p><small>請先挑選商品<br>並將需要的項目加入訂單。</small></div>';
+ $('cart-items').innerHTML=html+customHtml||'<div class="empty-cart">'+emptyCartIllustration+'<p>尚未選擇商品</p><small>請先挑選商品<br>並將需要的項目加入訂單。</small></div>';
  $('cart-items').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{const action=b.dataset.action;if(action==='remove-custom'){custom.splice(Number(b.dataset.index),1);}else if(action==='fixed-minus'||action==='fixed-plus'){
   const idx=Number(b.dataset.index),item=custom[idx];if(!item||pricedCommissionSubtotal(item)===null)return;
   const next=Math.max(0,Math.min(99,Number(item.quantity)+(action==='fixed-plus'?1:-1)));
@@ -252,7 +254,7 @@ function renderCart(){
  }else{const id=b.dataset.id;cart[id]=Math.max(0,Math.min(99,(cart[id]||0)+(action==='plus'?1:-1)));if(!cart[id])delete cart[id];save();}renderCart();renderProducts();updateFixedEquipmentUI();if(action==='plus'||action==='fixed-plus')pulseMobileOrderBar();}));
  const regularTotal=entries.reduce((n,p)=>n+p.price*cart[p.id],0);
  const fixedEquipmentTotal=custom.reduce((sum,x)=>sum+(pricedCommissionSubtotal(x)||0),0);
- $('cart-total').textContent=money(regularTotal+fixedEquipmentTotal);
+ animateCartTotal(regularTotal+fixedEquipmentTotal);markNewCartLines();
  refreshMobileOrderBar(count,regularTotal+fixedEquipmentTotal);
  refreshCheckoutButton();
  $('quote-note').hidden=!custom.some(x=>pricedCommissionSubtotal(x)===null);
@@ -409,4 +411,42 @@ function submitOrder(e){
  if(!validateCheckoutFields())return;
  if(config.orderBackend==='formspree')return submitOrderFormspree(e);
  return submitOrderGoogle(e);
+}
+
+
+// V1.3.75 — 品牌價格呈現、空白申請單與輕量動態回饋。
+const emptyCartIllustration='<svg class="empty-illustration" viewBox="0 0 64 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 8h36a5 5 0 0 1 0 10H14"/><path d="M14 8a5 5 0 0 0 0 10h4v22a4 4 0 0 0 4 4h28a4 4 0 0 0 4-4V18"/><path d="M26 26h18M26 32h12"/><path d="m48 34 8-8 3 3-8 8-4 1 1-4Z"/></svg>';
+const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+let lastShownQty={},lastCartKeys=null,lastCartTotal=null,totalAnimation=0;
+function bumpChangedQuantities(){
+ document.querySelectorAll('#products .product-qty').forEach(group=>{
+  const id=group.querySelector('[data-id]')?.dataset.id;
+  const value=group.querySelector('.product-qty-value');
+  if(!id||!value)return;
+  const qty=cart[id]||0;
+  if(Object.prototype.hasOwnProperty.call(lastShownQty,id)&&lastShownQty[id]!==qty&&!reduceMotion){
+   value.classList.remove('is-bumping');void value.offsetWidth;value.classList.add('is-bumping');
+  }
+  lastShownQty[id]=qty;
+ });
+}
+function markNewCartLines(){
+ const lines=[...document.querySelectorAll('#cart-items .cart-line')];
+ // 使用穩定的品項名稱，比對這次新加入的商品，不重複觸發既有品項動畫。
+ const keys=lines.map(line=>line.querySelector('strong')?.textContent||'');
+ if(lastCartKeys&&!reduceMotion)lines.forEach((line,i)=>{if(!lastCartKeys.includes(keys[i]))line.classList.add('is-new');});
+ lastCartKeys=keys;
+}
+function animateCartTotal(total){
+ const el=$('cart-total');if(!el)return;
+ cancelAnimationFrame(totalAnimation);
+ const from=lastCartTotal;lastCartTotal=total;
+ if(reduceMotion||from===null||from===total){el.innerHTML=moneyHtml(total);return;}
+ const start=performance.now(),duration=380;
+ const step=now=>{
+  const t=Math.min(1,(now-start)/duration),eased=1-Math.pow(1-t,3);
+  el.innerHTML=moneyHtml(Math.round(from+(total-from)*eased));
+  if(t<1)totalAnimation=requestAnimationFrame(step);
+ };
+ totalAnimation=requestAnimationFrame(step);
 }
