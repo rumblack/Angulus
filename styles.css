@@ -716,3 +716,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 /* V1.3.81 — 訂購確認視窗：手機維持雙欄，底部操作列保持可見 */
 .confirm-actions{position:sticky;bottom:calc(-1 * clamp(18px,4vw,32px));margin:24px calc(-1 * clamp(18px,4vw,32px)) calc(-1 * clamp(18px,4vw,32px));padding:14px clamp(18px,4vw,32px);background:#f3e5ca;border-top:1px solid #dbc9ab;z-index:1}
 @media(max-width:540px){.confirm-row{grid-template-columns:minmax(0,1fr) auto;gap:10px}.confirm-row strong{text-align:right;max-width:58vw}.confirm-actions .btn{flex:1 1 0;min-width:0}}
+
+
+/* V1.3.84 — 委託進度條 */
+.receipt-progress{list-style:none;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin:22px 0 6px;padding:0}
+.receipt-progress li{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;min-width:0}
+.receipt-progress li::before{content:'';position:absolute;top:10px;right:50%;left:-50%;height:2px;background:#d8c7a8;z-index:0}
+.receipt-progress li:first-child::before{display:none}
+.receipt-progress li.is-done::before,.receipt-progress li.is-current::before{background:#b58e56}
+.progress-node{position:relative;z-index:1;width:16px;height:16px;flex:none;margin-top:3px;transform:rotate(45deg);border:2px solid #cdb994;background:#fffaf1}
+.receipt-progress li.is-done .progress-node{background:#b58e56;border-color:#b58e56}
+.receipt-progress li.is-current .progress-node{background:#164a7d;border-color:#164a7d;box-shadow:0 0 0 4px #164a7d22}
+.receipt-progress li.is-done.is-current .progress-node{background:#b58e56;border-color:#b58e56;box-shadow:0 0 0 4px #b58e5633}
+.progress-label{font-size:13px;color:#8b7d68;font-weight:600;letter-spacing:.04em}
+.receipt-progress li.is-done .progress-label{color:#7a5f34}
+.receipt-progress li.is-current .progress-label{color:#153e67;font-weight:700}
+.progress-sub{margin-top:-4px;padding:2px 8px;border-radius:10px;background:#164a7d;color:#fff9ed;font-size:11px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.receipt-progress.is-cancelled{opacity:.45;filter:grayscale(1)}
+.receipt-progress-note{margin:8px 0 0;padding:9px 12px;border-radius:8px;background:#f6e6e1;color:#8a3a2c;font-size:13px;text-align:center}
+@media(max-width:420px){.progress-label{font-size:12px}.progress-node{width:14px;height:14px}}

@@ -19,6 +19,7 @@ function renderReceipt(r){
  txt(q('r-id'),r.orderId);txt(q('r-character'),r.character);txt(q('r-server'),r.server);
  txt(q('r-date'),r.createdAt);txt(q('r-status'),r.status);txt(q('r-payment'),r.paymentStatus);
  q('r-status').dataset.state=String(r.status||'');
+ renderProgress(r.status);
  const items=q('r-items');items.replaceChildren();
  if(r.items?.length){r.items.forEach(x=>appendLine(items,x.name+' × '+x.qty,x.category+' · '+formatGil(x.unitPrice)+' / 份',x.subtotal));}
  else appendLine(items,'沒有固定商品','此委託可能只有客製項目');
@@ -94,3 +95,34 @@ document.addEventListener('DOMContentLoaded',()=>{
  q('lookup-print').addEventListener('click',()=>window.print());
  renderHistory();
 });
+
+// V1.3.84 — 委託進度條：對應試算表的委託狀態
+const PROGRESS_STEPS=[
+ ['已收件',['待確認','待報價']],
+ ['已確認',['已確認','待付款']],
+ ['製作中',['製作中']],
+ ['待交付',['待交付']],
+ ['已完成',['已完成']]
+];
+function renderProgress(status){
+ const list=q('r-progress'),note=q('r-progress-note');if(!list||!note)return;
+ const s=String(status||'').trim();list.replaceChildren();
+ const cancelled=s==='已取消';
+ let current=PROGRESS_STEPS.findIndex(([,keys])=>keys.includes(s));
+ if(current<0)current=0;
+ list.classList.toggle('is-cancelled',cancelled);
+ PROGRESS_STEPS.forEach(([label],i)=>{
+  const li=document.createElement('li');
+  const last=i===PROGRESS_STEPS.length-1;
+  li.className=cancelled?'':i<current?'is-done':i===current?(last?'is-done is-current':'is-current'):'';
+  if(!cancelled&&i===current)li.setAttribute('aria-current','step');
+  const dot=document.createElement('span');dot.className='progress-node';dot.setAttribute('aria-hidden','true');
+  const text=document.createElement('span');text.className='progress-label';text.textContent=label;
+  li.append(dot,text);
+  if(!cancelled&&i===current&&s&&s!==label){const sub=document.createElement('small');sub.className='progress-sub';sub.textContent=s;li.appendChild(sub);}
+  list.appendChild(li);
+ });
+ note.hidden=!cancelled;
+ if(cancelled)note.textContent='此委託已取消。如有疑問，請聯絡店主。';
+ else note.textContent='';
+}
