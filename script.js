@@ -457,10 +457,10 @@ function renderConfirmation(data){
  const heading=document.createElement('h3');heading.textContent='選購內容';target.appendChild(heading);
  const entries=[...data.items.map(x=>({name:x.name,qty:x.qty,price:x.subtotal})),...data.custom.map(x=>({name:x.name,qty:Math.max(1,Number(x.quantity)||1),price:pricedCommissionSubtotal(x)}))];
  entries.forEach(x=>appendConfirmRow(target,`${x.name} × ${x.qty}`,x.price===null?'待報價':money(x.price)));
- appendConfirmRow(target,'固定商品及固定價套裝小計',money(data.estimated_gil));
+ appendConfirmRow(target,'訂單小計',money(data.estimated_gil));
  if(data.requires_quote)appendConfirmRow(target,'其他委託','含待報價項目，最終金額以店主確認為準');
  const personal=document.createElement('h3');personal.textContent='訂購人資訊';target.appendChild(personal);
- [['角色名稱',data.character],['所屬伺服器',data.server],['聯絡方式',data.contact],['希望交貨日期',data.deliveryDate],['方便交易時段',data.deliveryTime]].forEach(([k,v])=>appendConfirmRow(target,k,v));
+ [['角色名稱',data.character],['所屬伺服器',data.server],['聯絡方式',data.contact],['希望交貨日期',data.deliveryDate],['方便交易時段',data.deliveryTime]].forEach(([k,v])=>{if(v||['角色名稱','所屬伺服器','聯絡方式'].includes(k))appendConfirmRow(target,k,v);});
 }
 function applyReorderFromReceipt(){
  let request=null;try{request=JSON.parse(localStorage.getItem(REORDER_KEY)||'null');localStorage.removeItem(REORDER_KEY);}catch(e){}
