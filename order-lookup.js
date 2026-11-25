@@ -21,7 +21,7 @@ function renderReceipt(r){
  q('r-status').dataset.state=String(r.status||'');
  const items=q('r-items');items.replaceChildren();
  if(r.items?.length){r.items.forEach(x=>appendLine(items,x.name+' × '+x.qty,x.category+' · '+formatGil(x.unitPrice)+' / 份',x.subtotal));}
- else appendLine(items,'沒有固定商品','此訂單可能只有客製委託');
+ else appendLine(items,'沒有固定商品','此委託可能只有客製項目');
  txt(q('r-total'),formatGil(r.fixedSubtotal));
  const commissions=q('r-commissions');commissions.replaceChildren();
  const hasCustom=Array.isArray(r.commissions)&&r.commissions.length>0;
@@ -61,7 +61,7 @@ function renderHistory(){
  for(const entry of h){
   const btn=document.createElement('button');btn.type='button';btn.className='recent-entry';
   const name=document.createElement('strong');txt(name,entry.character);
-  const id=document.createElement('small');txt(id,entry.orderId||'訂單紀錄');
+  const id=document.createElement('small');txt(id,entry.orderId||'委託紀錄');
   btn.append(name,id);btn.addEventListener('click',()=>{q('lookup-character').value=entry.character;q('lookup-code').value=entry.requestId;q('lookup-form').requestSubmit();});
   list.appendChild(btn);
  }
@@ -72,17 +72,17 @@ document.addEventListener('DOMContentLoaded',()=>{
  q('lookup-form').addEventListener('submit',async e=>{
   e.preventDefault();if(active)return;
   const character=q('lookup-character').value.trim();const code=q('lookup-code').value.trim().toLowerCase();
-  if(!character||!/^[a-f0-9]{40}$/.test(code)){q('lookup-status').className='form-status error';txt(q('lookup-status'),'請備妥登記時的角色名稱與 40 碼委託密鑰，再查閱紀錄。');q('lookup-retry').hidden=true;return;}
+  if(!character||!/^[a-f0-9]{40}$/.test(code)){q('lookup-status').className='form-status error';txt(q('lookup-status'),'請備妥登記時的角色名稱與 40 碼委託查詢碼，再查閱紀錄。');q('lookup-retry').hidden=true;return;}
   active=true;q('lookup-submit').disabled=true;q('lookup-retry').hidden=true;q('lookup-result').hidden=true;
-  txt(q('lookup-status'),'正在翻閱 Angulus 的委託紀錄，尋找您的訂單……');q('lookup-status').className='form-status';
+  txt(q('lookup-status'),'正在翻閱 Angulus 的委託紀錄，尋找你的委託……');q('lookup-status').className='form-status';
   try{const res=await lookupOrder(character,code);
-   if(res?.found&&res.receipt){renderReceipt(res.receipt);txt(q('lookup-status'),'已尋得您的委託卷宗，收據與目前進度已呈列於下方。');}
-   else{q('lookup-status').className='form-status error';txt(q('lookup-status'),res?.message||'工坊卷宗中尚未尋得相符紀錄。請核對角色名稱與查閱密鑰，或向店主詢問。');}
+   if(res?.found&&res.receipt){renderReceipt(res.receipt);txt(q('lookup-status'),'已尋得你的委託卷宗，收據與目前進度已呈列於下方。');}
+   else{q('lookup-status').className='form-status error';txt(q('lookup-status'),res?.message||'工坊卷宗中尚未尋得相符紀錄。請核對角色名稱與查詢碼，或向店主詢問。');}
   }catch(err){q('lookup-status').className='form-status error';txt(q('lookup-status'),err.message);q('lookup-retry').hidden=!['timeout','network'].includes(err.kind);}
   finally{active=false;q('lookup-submit').disabled=false;}
  });
  q('lookup-retry').addEventListener('click',()=>{if(!active)q('lookup-form').requestSubmit();});
- q('clear-order-history').addEventListener('click',()=>{if(!confirm('確定清除這部裝置保存的訂單查詢紀錄？清除後須自行輸入查詢碼。'))return;localStorage.removeItem(historyKey);renderHistory();});
+ q('clear-order-history').addEventListener('click',()=>{if(!confirm('確定清除這部裝置保存的委託查詢紀錄？清除後須自行輸入查詢碼。'))return;localStorage.removeItem(historyKey);renderHistory();});
  q('lookup-reorder').addEventListener('click',()=>{
   const r=currentReceipt;if(!r)return;
   const items=(Array.isArray(r.items)?r.items:[]).map(x=>({name:String(x.name||''),category:String(x.category||''),unitPrice:Number(x.unitPrice),qty:Number(x.qty)}));
