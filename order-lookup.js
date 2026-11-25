@@ -23,7 +23,7 @@ function renderReceipt(r){
  const items=q('r-items');items.replaceChildren();
  if(r.items?.length){r.items.forEach(x=>appendLine(items,x.name+' × '+x.qty,x.category+' · '+formatGil(x.unitPrice)+' / 組',x.subtotal));}
  else appendLine(items,'沒有固定商品','此委託可能只有客製項目');
- // V1.3.98: 收據的委託小計取訂單總表「訂單總額 Gil」，不是固定商品小計。
+ // 收據的「委託總額」優先取訂單總表「訂單總額 Gil」，否則為固定商品小計＋報價項目金額。
  const total=r.orderTotal!==null&&r.orderTotal!==undefined&&Number.isFinite(Number(r.orderTotal))?
   Number(r.orderTotal):(Number(r.fixedSubtotal)||0)+(Number(r.finalQuote)||0);
  setGil(q('r-total'),total);
@@ -31,7 +31,7 @@ function renderReceipt(r){
  const hasCustom=Array.isArray(r.commissions)&&r.commissions.length>0;
  q('r-commission-block').hidden=!hasCustom;
  if(hasCustom)r.commissions.forEach(x=>appendLine(commissions,x.name,[x.type||'客製委託',[x.equipmentType,x.job].filter(Boolean).join(' / '),'數量 '+x.qty,x.status].filter(Boolean).join(' · '),x.subtotal===null||x.subtotal===undefined?undefined:x.subtotal));
- const quoteText=r.finalQuote!==null&&r.finalQuote!==undefined?'店主最終報價：'+formatGil(r.finalQuote):(r.requiresQuote?'包含待報價項目，總額須等待店主確認。':'');txt(q('r-quote'),quoteText);q('r-quote').hidden=!quoteText;
+ const quoteText=r.finalQuote!==null&&r.finalQuote!==undefined?'報價項目金額：'+formatGil(r.finalQuote):(r.requiresQuote?'包含待報價項目，總額須等待店主確認。':'');txt(q('r-quote'),quoteText);q('r-quote').hidden=!quoteText;
  q('lookup-result').hidden=false;
  q('lookup-result').scrollIntoView({behavior:'smooth',block:'start'});
 }
