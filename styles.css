@@ -715,4 +715,4 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* V1.3.81 — 訂購確認視窗：手機維持雙欄，底部操作列保持可見 */
 .confirm-actions{position:sticky;bottom:calc(-1 * clamp(18px,4vw,32px));margin:24px calc(-1 * clamp(18px,4vw,32px)) calc(-1 * clamp(18px,4vw,32px));padding:14px clamp(18px,4vw,32px);background:#f3e5ca;border-top:1px solid #dbc9ab;z-index:1}
-@media(max-width:540px){.confirm-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.confirm-row strong{text-align:right;max-width:none}.confirm-actions .btn{flex:1 1 0;min-width:0}}
+@media(max-width:540px){.confirm-row{grid-template-columns:minmax(0,1fr) auto;gap:10px}.confirm-row strong{text-align:right;max-width:58vw}.confirm-actions .btn{flex:1 1 0;min-width:0}}
