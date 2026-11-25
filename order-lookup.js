@@ -6,6 +6,7 @@ const endpoint=String(window.SHOP_CONFIG?.googleScriptUrl||'');
 let active=false;
 let currentReceipt=null;
 function txt(node,value){node.textContent=String(value??'');}
+function setGil(node,v){node.textContent=new Intl.NumberFormat('en-US').format(Number(v)||0);const unit=document.createElement('span');unit.className='gil';unit.textContent='Gil';node.appendChild(unit);}
 function appendLine(parent,title,detail,price){
  const row=document.createElement('div');row.className='receipt-line';
  const left=document.createElement('div');const bold=document.createElement('strong');txt(bold,title);left.appendChild(bold);
@@ -16,19 +17,18 @@ function appendLine(parent,title,detail,price){
 }
 function renderReceipt(r){
  currentReceipt=r;
- txt(q('r-id'),r.orderId);txt(q('r-character'),r.character);txt(q('r-server'),r.server);
- txt(q('r-date'),r.createdAt);txt(q('r-status'),r.status);txt(q('r-payment'),r.paymentStatus);
- q('r-status').dataset.state=String(r.status||'');
+ txt(q('r-id'),'委託編號 '+(r.orderId||''));txt(q('r-character'),r.character);txt(q('r-server'),r.server);
+ txt(q('r-date'),r.createdAt);txt(q('r-payment'),r.paymentStatus);q('r-payment').className=r.paymentStatus==='已付款'?'pay-chip is-paid':r.paymentStatus==='待付款'?'pay-chip is-due':'';
  renderProgress(r.status);
  const items=q('r-items');items.replaceChildren();
- if(r.items?.length){r.items.forEach(x=>appendLine(items,x.name+' × '+x.qty,x.category+' · '+formatGil(x.unitPrice)+' / 份',x.subtotal));}
+ if(r.items?.length){r.items.forEach(x=>appendLine(items,x.name+' × '+x.qty,x.category+' · '+formatGil(x.unitPrice)+' / 組',x.subtotal));}
  else appendLine(items,'沒有固定商品','此委託可能只有客製項目');
- txt(q('r-total'),formatGil(r.fixedSubtotal));
+ setGil(q('r-total'),r.fixedSubtotal);
  const commissions=q('r-commissions');commissions.replaceChildren();
  const hasCustom=Array.isArray(r.commissions)&&r.commissions.length>0;
  q('r-commission-block').hidden=!hasCustom;
  if(hasCustom)r.commissions.forEach(x=>appendLine(commissions,x.name,(x.type||'客製委託')+' · '+[x.equipmentType,x.job].filter(Boolean).join(' / ')+' · 數量 '+x.qty+' · '+x.status,x.subtotal===null||x.subtotal===undefined?undefined:x.subtotal));
- txt(q('r-quote'),r.finalQuote!==null&&r.finalQuote!==undefined?'店主最終報價：'+formatGil(r.finalQuote):(r.requiresQuote?'包含待報價項目，總額須等待店主確認。':'金額以店主確認為準。'));
+ const quoteText=r.finalQuote!==null&&r.finalQuote!==undefined?'店主最終報價：'+formatGil(r.finalQuote):(r.requiresQuote?'包含待報價項目，總額須等待店主確認。':'');txt(q('r-quote'),quoteText);q('r-quote').hidden=!quoteText;
  q('lookup-result').hidden=false;
  q('lookup-result').scrollIntoView({behavior:'smooth',block:'start'});
 }
