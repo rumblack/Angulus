@@ -31,11 +31,15 @@ const equipmentNameOptions={
 };
 // 價格由「裝備大類＋裝備名稱＋訂製方式」決定，與 Google 後端對照。
 const FIXED_EQUIPMENT={
- '戰鬥裝備|典禮套裝（740）|整套':{price:500000,description:'主副手＋裝備飾品十件'},
- '製作採集|雀翎套裝＋金拇指工具組（750）|整套':{price:1100000,description:'主副手＋裝備飾品十件'},
- '製作採集|雀翎套裝＋金拇指工具組（750）|宇宙工具專用':{price:1000000,description:'金拇指副工具一個＋雀翎套裝備飾品十件'}
+ '戰鬥裝備|典禮套裝（740）|整套':{priceId:'equipment-ceremonial-740-full',description:'主副手＋裝備飾品十件'},
+ '製作採集|雀翎套裝＋金拇指工具組（750）|整套':{priceId:'equipment-feather-750-full',description:'主副手＋裝備飾品十件'},
+ '製作採集|雀翎套裝＋金拇指工具組（750）|宇宙工具專用':{priceId:'equipment-feather-750-cosmic',description:'金拇指副工具一個＋雀翎套裝備飾品十件'}
 };
-const fixedSpec=(type,name,mode)=>FIXED_EQUIPMENT[`${type}|${name}|${mode}`]||null;
+const fixedSpec=(type,name,mode)=>{
+ const meta=FIXED_EQUIPMENT[`${type}|${name}|${mode}`];if(!meta)return null;
+ const price=Number(config.equipmentPrices?.[meta.priceId]);
+ return Number.isSafeInteger(price)&&price>0?{price,description:meta.description}:null;
+};
 const fixedSpecForItem=x=>x?.type==='裝備訂製'?fixedSpec(x.equipmentType,x.equipmentName,x.equipmentSet):null;
 const pricedCommissionSubtotal=x=>{const spec=fixedSpecForItem(x);return spec?spec.price*Number(x.quantity||0):null;};
 let selectedEquipmentType='';let selectedEquipmentJob=null;let selectedEquipmentName='';let selectedEquipmentSet='';

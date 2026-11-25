@@ -14,6 +14,12 @@ window.SHOP_CONFIG = {
     '宮廷愛人（770/7.4）': { name: '宮廷愛人', note: '品級 770・7.4' },
     '雀翎套裝＋金拇指工具組（750）': { name: '雀翎＋金拇指工具組', note: '品級 750' }
   },
+  // 裝備固定售價：修改後請同步更新 Google「商品價格表」的對應編號售價。
+  equipmentPrices: {
+    'equipment-ceremonial-740-full': 500000,
+    'equipment-feather-750-full': 1100000,
+    'equipment-feather-750-cosmic': 1000000
+  },
   products: [
     { id:'mountain-tea-999', pack:'999 杯', name:'高山茶一組', category:'常駐商品', price:329000, days:'依店主確認', badge:'常駐', desc:'前往舊薩雷安時，不妨多備一些——說不定當地的人們正需要這份暖心茶香。' },
     { id:'artificial-dark-matter-trio', pack:'3 件', name:'人造暗物質三件套', category:'常駐商品', price:20000, days:'依店主確認', desc:'內含人造暗物質 α、β、γ 各一份。聽說幻境村的工匠們正需要這些材料，或許能為你的冒險派上用場。' },
