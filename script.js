@@ -118,7 +118,8 @@ function save(){try{localStorage.setItem(localKey,JSON.stringify(cart));}catch(e
 function refreshMobileOrderBar(count,total){
  const bar=$('mobile-order-bar');if(!bar)return;
  bar.hidden=count<=0;
- $('mobile-order-count').textContent=`已選 ${count} 項`;
+ const distinct=products.filter(p=>cart[p.id]>0&&p.price!==null).length+custom.length;
+ $('mobile-order-count').textContent=`${distinct} 項・${count} 件`;
  $('mobile-order-total').textContent=money(total);
 }
 function pulseMobileOrderBar(){
@@ -127,6 +128,15 @@ function pulseMobileOrderBar(){
 }
 
 function setup(){// Keep document.title from HTML head, matching Open Graph preview metadata.
+ const orderPanel=$('order');
+ if(orderPanel&&'IntersectionObserver' in window){
+  const observer=new IntersectionObserver(entries=>{
+    const bar=$('mobile-order-bar');if(!bar)return;
+    bar.classList.toggle('is-near-order',entries[0].isIntersecting);
+  },{threshold:0,rootMargin:'0px 0px -24px 0px'});
+  observer.observe(orderPanel);
+ }
+
  $('brand-name').textContent=config.name||'Angulus';$('footer-name').textContent=config.name||'Angulus';$('shop-notice').textContent=config.notice||'本店使用 FF14 遊戲內 Gil 計價。';if(config.contactUrl&&/^https:\/\//.test(config.contactUrl)){$('contact-link').href=config.contactUrl;$('contact-link').textContent=config.contactLabel||'聯絡店主';$('contact-link').hidden=false;}
  $('menu-toggle').addEventListener('click',()=>{const open=$('nav').classList.toggle('open');$('menu-toggle').setAttribute('aria-expanded',String(open));});document.querySelectorAll('#nav a').forEach(a=>a.addEventListener('click',()=>{$('nav').classList.remove('open');$('menu-toggle').setAttribute('aria-expanded','false');}));document.querySelectorAll('a[href="#shop"]').forEach(a=>a.addEventListener('click',()=>selectCategory('常駐商品')));
  const navCustom=$('nav-open-custom');if(navCustom)navCustom.addEventListener('click',e=>{e.preventDefault();selectCategory('客製化委託');location.hash='commission';});
@@ -176,8 +186,7 @@ function renderProducts(){
  const shown=products.filter(p=>p.price!==null&&categoryOf(p)===currentCategory);
  $('products').innerHTML=shown.map(p=>{
   const customItem=p.price===null;const qty=cart[p.id]||0;
-  const qtyMatch=String(p.desc||'').match(/(?:999|99|10|3)\s*(?:杯|塊|瓶|份|個)/);
-  const packLabel=p.id==='artificial-dark-matter-trio'?'<span class="pack-tag">每組 × 3 件</span>':(qtyMatch?`<span class="pack-tag">每組 × ${safe(qtyMatch[0].replace(/\s+/g,''))}</span>`:'');
+  const packLabel=p.pack?`<span class="pack-tag">每組 × ${safe(p.pack)}</span>`:'';
   const potionType=[[/剛力/,'strength'],[/智力/,'intelligence'],[/意力/,'mind'],[/巧力/,'dexterity']].find(([pattern])=>pattern.test(p.name));
   const action=customItem?`<button type="button" class="add-product" data-id="${safe(p.id)}">填寫委託需求</button>`:
    `<div class="product-purchase"><strong class="price">${money(p.price)}</strong><div class="product-qty" role="group" aria-label="${safe(p.name)}數量調整"><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="-1" aria-label="減少${safe(p.name)}數量" ${qty===0?'disabled':''}>−</button><span class="product-qty-value" aria-live="polite">${qty}</span><button class="product-qty-btn" type="button" data-id="${safe(p.id)}" data-delta="1" aria-label="增加${safe(p.name)}數量" ${qty===99?'disabled':''}>＋</button></div></div>`;
