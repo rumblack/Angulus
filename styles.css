@@ -4731,3 +4731,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .lookup-receipt .reorder-note:empty {
   display: none;
 }
+
+/* V1.3.88 — 記住資料選項恢復一般文字顏色 */
+#checkout-form .remember-customer>span{color:inherit}
