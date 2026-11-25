@@ -4742,3 +4742,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 /* V1.3.90 — 長網址或長字串自動換行，避免撐寬申請單 */
 .cart-line>div{min-width:0}
 .cart-line small,.cart-line strong{overflow-wrap:anywhere}
+
+/* V1.4.01 - 商品資料同步狀態 */
+.catalog-notice{margin:12px 0 18px;padding:12px 15px;border:1px solid #b99d6d;border-radius:8px;background:#faf3e7;color:#58462d;font-size:13px;line-height:1.7;}
+.catalog-notice[hidden]{display:none;}

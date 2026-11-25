@@ -20,6 +20,7 @@ window.SHOP_CONFIG = {
     'equipment-feather-750-full': 1100000,
     'equipment-feather-750-cosmic': 1000000
   },
+  // V1.4.01：下列為載入前的預覽／備援顯示資料，不是商品管理主檔。正式商品、價格、上架狀態一律以 Google「商品價格表」為準。
   products: [
     { id:'mountain-tea-999', pack:'999 杯', name:'高山茶一組', category:'常駐商品', price:329000, days:'依店主確認', badge:'常駐', desc:'前往舊薩雷安時，不妨多備一些——說不定當地的人們正需要這份暖心茶香。' },
     { id:'artificial-dark-matter-trio', pack:'3 件', name:'人造暗物質三件套', category:'常駐商品', price:20000, days:'依店主確認', desc:'內含人造暗物質 α、β、γ 各一份。聽說幻境村的工匠們正需要這些材料，或許能為你的冒險派上用場。' },
