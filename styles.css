@@ -589,7 +589,7 @@ body,button,input,select,textarea,.product-qty-btn,.quantity-btn,.footer-inner p
   100%{box-shadow:0 -3px 18px #0002;transform:translateY(0)}
 }
 @media(max-width:760px){
-  body:has(.mobile-order-bar:not([hidden])){padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))}
+  body:has(.mobile-order-bar:not([hidden])) footer{padding-bottom:calc(28px + 78px + env(safe-area-inset-bottom,0px))}
   .mobile-order-bar:not([hidden]){display:flex;align-items:center;justify-content:space-between;gap:12px;position:fixed;bottom:0;left:0;right:0;z-index:1000;min-height:68px;padding:10px max(14px,env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-right,0px));background:var(--a-navy);color:#FFFFFF;border-top:2px solid var(--a-gold);box-shadow:0 -3px 18px #0002}
   .mobile-order-bar.is-pulsing{animation:angulus-mobile-cart-pulse .52s ease-out}
   .mobile-order-bar.is-near-order:not([hidden]){display:none}

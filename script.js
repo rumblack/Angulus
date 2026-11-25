@@ -67,7 +67,7 @@ function adjustFixedEquipmentQuantity(delta){
  renderCart();updateFixedEquipmentUI();
  const status=$('equipment-status');status.className='custom-status success';
  if(delta>0)pulseMobileOrderBar();
- status.textContent=qty>0?`已將 ${qty} 套${selectedEquipmentName}（${selectedEquipmentSet}）登記於訂購申請單，合計 ${money(qty*spec.price)}。`:'已從訂購申請單移除此項套裝。';
+ status.textContent=qty>0?`已將 ${qty} 套${config.equipmentDisplay?.[selectedEquipmentName]?.name||selectedEquipmentName}（${selectedEquipmentSet}）登記於訂購申請單，合計 ${money(qty*spec.price)}。`:'已從訂購申請單移除此項套裝。';
 }
 function updateEquipmentSetChoices(){
  const field=$('equipment-set-field');if(!field)return;
@@ -139,7 +139,7 @@ function chooseEquipmentType(type){
  $('equipment-summary-type').textContent=type;
  $('equipment-job-step').hidden=false;
  $('equipment-job-hint').textContent='請選擇職業。';
- $('equipment-job-groups').innerHTML=equipmentJobs[type].map(g=>`<div class="equipment-job-group"><h5>${safe(g.group)}</h5><div class="equipment-job-grid">${g.jobs.map(([abbr,name])=>`<button type="button" class="equipment-job-btn role-${g.role}" data-job-abbr="${safe(abbr)}" data-job-name="${safe(name)}" aria-label="${safe(name)}" aria-pressed="false" title="${safe(name)}">${jobIconByAbbr[abbr]?`<img class="job-icon-img" src="assets/jobs/${jobIconByAbbr[abbr]}?v=1.3.70" alt="" width="48" height="48" loading="lazy">`:`<span class="job-monogram" aria-hidden="true">${safe(abbr)}</span>`}<span class="job-label">${safe(name)}</span></button>`).join('')}</div></div>`).join('');
+ $('equipment-job-groups').innerHTML=equipmentJobs[type].map(g=>`<div class="equipment-job-group"><h5>${safe(g.group)}</h5><div class="equipment-job-grid">${g.jobs.map(([abbr,name])=>`<button type="button" class="equipment-job-btn role-${g.role}" data-job-abbr="${safe(abbr)}" data-job-name="${safe(name)}" aria-label="${safe(name)}" aria-pressed="false" title="${safe(name)}">${jobIconByAbbr[abbr]?`<img class="job-icon-img" src="assets/jobs/${jobIconByAbbr[abbr]}?v=1.3.71" alt="" width="48" height="48" loading="lazy">`:`<span class="job-monogram" aria-hidden="true">${safe(abbr)}</span>`}<span class="job-label">${safe(name)}</span></button>`).join('')}</div></div>`).join('');
  $('equipment-job-groups').querySelectorAll('.equipment-job-btn').forEach(b=>b.addEventListener('click',()=>chooseEquipmentJob(b.dataset.jobAbbr,b.dataset.jobName)));
 }
 function chooseEquipmentJob(abbr,name){
