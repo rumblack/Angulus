@@ -4734,3 +4734,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* V1.3.88 — 記住資料選項恢復一般文字顏色 */
 #checkout-form .remember-customer>span{color:inherit}
+
+/* V1.3.89 — 補充備註只能上下調整，避免撐寬整張申請單 */
+#checkout-form{grid-template-columns:minmax(0,1fr)}
+#checkout-form textarea{resize:vertical;max-width:100%}
