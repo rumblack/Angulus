@@ -65,7 +65,8 @@ function renderHistory(){
  }
 }
 document.addEventListener('DOMContentLoaded',()=>{
- q('lookup-menu').addEventListener('click',()=>{const open=q('lookup-nav').classList.toggle('open');q('lookup-menu').setAttribute('aria-expanded',String(open));});
+ q('lookup-menu').addEventListener('click',()=>{const open=q('lookup-nav').classList.toggle('open');q('lookup-menu').setAttribute('aria-expanded',String(open));q('lookup-menu').textContent=open?'關閉':'選單';});
+ q('lookup-nav').querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{q('lookup-nav').classList.remove('open');q('lookup-menu').setAttribute('aria-expanded','false');q('lookup-menu').textContent='選單';}));
  q('lookup-form').addEventListener('submit',async e=>{
   e.preventDefault();if(active)return;
   const character=q('lookup-character').value.trim();const code=q('lookup-code').value.trim().toLowerCase();
