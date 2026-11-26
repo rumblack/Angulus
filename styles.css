@@ -4785,3 +4785,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* V1.4.06 — 三、頁尾改深藍，與導覽列呼應 */
 footer{background:linear-gradient(100deg,#0b2440,#123d72 50%,#0b2440)!important}
+
+/* V1.4.07 — 手機店舖資訊固定兩行，分隔改為菱形 */
+@media(max-width:760px){
+ .shop-location-detail+.shop-location-detail::before{content:none!important}
+ .shop-location-detail:nth-of-type(3)::before{content:""!important;display:inline-block;width:5px;height:5px;margin:0 10px;background:#c4a16a;transform:rotate(45deg);align-self:center}
+ .shop-location-detail:nth-of-type(4){flex-basis:100%;justify-content:center;margin-top:4px}
+}
