@@ -1,3 +1,16 @@
+# Angulus V1.4.06
+
+本版僅調整網站排版：手機版店舖資訊與商品卡、桌面版橫跨兩欄卡片、深藍色頁尾。
+
+- `styles.css`：新增 V1.4.06 樣式規則至檔案結尾。
+- `index.html`、`orders.html`：版本號與快取參數更新為 1.4.06。
+- `script.js`、`config.js`、`Code.gs` 和試算表均不變。
+- 商品標籤仍由 Google 試算表「商品價格表」管理。
+
+部署：直接覆蓋 GitHub Pages 的 `styles.css`、`index.html`、`orders.html`，無須重新部署 Google Apps Script。
+
+---
+
 # Angulus V1.4.05
 
 以 V1.4.04 為基礎的裝備同步容錯、顯示文字與客人提示修正版。

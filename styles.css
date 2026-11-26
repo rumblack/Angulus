@@ -4757,3 +4757,31 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   #equipment-set-options.equipment-set-options {grid-template-columns: repeat(2,minmax(0,1fr));}
   #equipment-set-options .equipment-set-choice small {font-size:12px;}
 }
+
+/* V1.4.06 — 一、手機版縮短：店舖資訊一行、商品卡緊湊 */
+@media(max-width:760px){
+ .shop-location-inner{display:flex!important;flex-wrap:wrap;align-items:center;justify-content:center;gap:0 6px!important;padding-top:10px!important;padding-bottom:10px!important}
+ .shop-location-heading,.shop-location-label{display:none!important}
+ .shop-location-detail{display:inline-flex!important;padding:0!important;border:0!important;grid-template-columns:none!important;min-height:0!important}
+ .shop-location-detail strong{font-size:13px!important}
+ .shop-location-detail+.shop-location-detail::before{content:'・';color:#c4a16a;margin-right:6px}
+ .shop-location-detail:nth-of-type(3) strong::before{content:'店主 ';color:#d9c7a3;font-weight:500}
+ .product-grid .product-card{padding-top:12px!important;padding-bottom:12px!important}
+ .product-card .pack-tag{margin-bottom:6px!important}
+ .product-card .product-info p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:10px!important}
+}
+
+/* V1.4.06 — 二、橫跨兩欄的卡片改左右排列（桌面版） */
+@media(min-width:761px){
+ .product-grid>.product-card:first-child:nth-last-child(odd){min-height:0!important}
+ .product-grid>.product-card:first-child:nth-last-child(odd) .product-info{display:grid!important;grid-template-columns:minmax(0,1fr) auto;column-gap:32px;align-items:center}
+ .product-grid>.product-card:first-child:nth-last-child(odd) .product-info>*{grid-column:1;justify-self:start}
+ .product-grid>.product-card:first-child:nth-last-child(odd) .product-bottom{grid-column:2!important;grid-row:1/span 6;align-self:end;justify-self:end!important;margin:0!important;padding:30px 0 0!important;border:0!important}
+ .product-grid>.product-card:first-child:nth-last-child(odd) .product-purchase{flex-direction:column;align-items:flex-end;gap:12px}
+ .product-grid>.product-card:first-child:nth-last-child(odd) .price{font-size:28px!important}
+ .product-grid>.product-card:first-child:nth-last-child(odd) .product-info p{margin-bottom:0!important}
+}
+.product-grid>.product-card.is-selected:first-child:nth-last-child(odd){background:#FFF4DF!important}
+
+/* V1.4.06 — 三、頁尾改深藍，與導覽列呼應 */
+footer{background:linear-gradient(100deg,#0b2440,#123d72 50%,#0b2440)!important}
