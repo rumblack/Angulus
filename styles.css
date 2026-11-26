@@ -4746,3 +4746,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 /* V1.4.01 - 商品資料同步狀態 */
 .catalog-notice{margin:12px 0 18px;padding:12px 15px;border:1px solid #b99d6d;border-radius:8px;background:#faf3e7;color:#58462d;font-size:13px;line-height:1.7;}
 .catalog-notice[hidden]{display:none;}
+
+/* V1.4.04：Google 試算表可增加任意訂製方式，選項自適應排版。 */
+#equipment-set-options.equipment-set-options,
+#equipment-set-options.equipment-set-options:has([data-equipment-set="宇宙工具專用"]:not([hidden])) {
+  grid-template-columns: repeat(auto-fit,minmax(min(100%,145px),1fr));
+}
+#equipment-set-options .equipment-set-choice small {font-size:12px;}
+@media (max-width:480px) {
+  #equipment-set-options.equipment-set-options {grid-template-columns: repeat(2,minmax(0,1fr));}
+  #equipment-set-options .equipment-set-choice small {font-size:12px;}
+}

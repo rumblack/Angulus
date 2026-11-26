@@ -27,23 +27,30 @@ const equipmentJobs={
   {group:'採集職業',role:'gather',jobs:[['MIN','採礦工'],['BTN','園藝工'],['FSH','捕魚人']]}
  ]
 };
-const equipmentNameOptions={
- '戰鬥裝備':['典禮套裝（740）','宮廷愛人（770/7.4）','其他'],
- '製作採集':['雀翎套裝＋金拇指工具組（750）','其他']
-};
-// 價格由「裝備大類＋裝備名稱＋訂製方式」決定，與 Google 後端對照。
-const FIXED_EQUIPMENT={
- '戰鬥裝備|典禮套裝（740）|整套':{priceId:'equipment-ceremonial-740-full',description:'主副手＋裝備飾品十件'},
- '製作採集|雀翎套裝＋金拇指工具組（750）|整套':{priceId:'equipment-feather-750-full',description:'主副手＋裝備飾品十件'},
- '製作採集|雀翎套裝＋金拇指工具組（750）|宇宙工具專用':{priceId:'equipment-feather-750-cosmic',description:'金拇指副工具一個＋雀翎套裝備飾品十件'}
-};
+// V1.4.04：套裝／訂製方式完全由 Apps Script 公開唯讀資料提供。
+// ID 僅作管理用途；訂單仍以大類＋套裝名稱＋訂製方式由後端核價。
+let equipmentEntries=[];
+const equipmentNameOptions=()=>Object.fromEntries(Object.keys(equipmentJobs).map(type=>[
+ type,[...new Set(equipmentEntries.filter(x=>x.type===type).map(x=>x.name)),'其他']
+]));
+const equipmentChoice=(type,name,mode)=>equipmentEntries.find(x=>x.type===type&&x.name===name&&x.mode===mode)||null;
 const fixedSpec=(type,name,mode)=>{
- const meta=FIXED_EQUIPMENT[`${type}|${name}|${mode}`];if(!meta)return null;
- const price=Number(config.equipmentPrices?.[meta.priceId]);
- return Number.isSafeInteger(price)&&price>0?{price,description:meta.description}:null;
+ const entry=equipmentChoice(type,name,mode);
+ return entry&&entry.pricing==='固定售價'&&Number.isSafeInteger(entry.price)&&entry.price>0?
+  {price:entry.price,description:entry.description,id:entry.id}:null;
 };
 const fixedSpecForItem=x=>x?.type==='裝備訂製'?fixedSpec(x.equipmentType,x.equipmentName,x.equipmentSet):null;
 const pricedCommissionSubtotal=x=>{const spec=fixedSpecForItem(x);return spec?spec.price*Number(x.quantity||0):null;};
+function refreshEquipmentCart(){
+ const removed=[];
+ custom=custom.filter(x=>{
+  if(x.type!=='裝備訂製'||x.equipmentName==='其他')return true;
+  const e=equipmentChoice(x.equipmentType,x.equipmentName,x.equipmentSet);
+  if(e)return true;
+  removed.push(x.name);return false;
+ });
+ return removed;
+}
 let selectedEquipmentType='';let selectedEquipmentJob=null;let selectedEquipmentName='';let selectedEquipmentSet='';
 function selectedFixedEquipment(){return selectedEquipmentJob?fixedSpec(selectedEquipmentType,selectedEquipmentName,selectedEquipmentSet):null;}
 function selectedFixedEquipmentIndex(){return custom.findIndex(x=>x.equipmentJob===selectedEquipmentJob?.name&&x.equipmentType===selectedEquipmentType&&x.equipmentName===selectedEquipmentName&&x.equipmentSet===selectedEquipmentSet&&fixedSpecForItem(x));}
@@ -52,7 +59,7 @@ function updateFixedEquipmentUI(){
  const box=$('equipment-fixed-purchase'),fields=$('equipment-quote-fields');if(!box||!fields)return;
  const spec=selectedFixedEquipment();box.hidden=!spec;fields.hidden=!!spec||!selectedEquipmentName||(selectedEquipmentName!=='其他'&&!selectedEquipmentSet);
  if(!spec)return;
- $('equipment-fixed-name').textContent=`${(config.equipmentDisplay?.[selectedEquipmentName]?.name||selectedEquipmentName.replace(/（[^）]*）$/, ''))}｜${selectedEquipmentSet}`;
+ $('equipment-fixed-name').textContent=`${selectedEquipmentName}｜${selectedEquipmentSet}`;
  $('equipment-fixed-description').textContent=spec.description;
  $('equipment-fixed-price').innerHTML=moneyHtml(spec.price)+'<span class="price-per-set">／套</span>';
  $('equipment-fixed-quantity').setAttribute('aria-label',`${selectedEquipmentName} ${selectedEquipmentSet}數量調整`);
@@ -77,19 +84,19 @@ function adjustFixedEquipmentQuantity(delta){
  renderCart();updateFixedEquipmentUI();
  const status=$('equipment-status');status.className='custom-status success';
  if(delta>0)pulseMobileOrderBar();
- status.textContent=qty>0?`已將 ${qty} 套${config.equipmentDisplay?.[selectedEquipmentName]?.name||selectedEquipmentName}（${selectedEquipmentSet}）登記於訂購申請單，合計 ${money(qty*spec.price)}。`:'已從訂購申請單移除此項套裝。';
+ status.textContent=qty>0?`已將 ${qty} 套${selectedEquipmentName}（${selectedEquipmentSet}）登記於訂購申請單，合計 ${money(qty*spec.price)}。`:'已從訂購申請單移除此項套裝。';
 }
 function updateEquipmentSetChoices(){
  const field=$('equipment-set-field');if(!field)return;
  const show=!!selectedEquipmentName&&selectedEquipmentName!=='其他';field.hidden=!show;
- const universe=selectedEquipmentType==='製作採集'&&selectedEquipmentName==='雀翎套裝＋金拇指工具組（750）';
- $('equipment-set-options').querySelectorAll('[data-equipment-set]').forEach(b=>{
-  b.hidden=b.dataset.equipmentSet==='宇宙工具專用'&&!universe;
-  b.setAttribute('aria-pressed',String(show&&!b.hidden&&selectedEquipmentSet===b.dataset.equipmentSet));
- });
- const hint=$('equipment-set-hint');const spec=selectedFixedEquipment();
- hint.hidden=!!selectedEquipmentSet;
- hint.textContent=universe?'請選擇「整套」、「宇宙工具專用」或「散件」。':'請選擇「整套」或「散件」。';
+ const modes=equipmentEntries.filter(x=>x.type===selectedEquipmentType&&x.name===selectedEquipmentName);
+ const holder=$('equipment-set-options');
+ holder.innerHTML=modes.map(x=>`<button type="button" class="equipment-set-choice" data-equipment-set="${safe(x.mode)}" aria-pressed="${String(selectedEquipmentSet===x.mode)}"><strong>${safe(x.mode)}</strong><small>${safe(x.description|| (x.pricing==='待報價'?'請填寫詳細需求':'固定價格'))}</small></button>`).join('');
+ holder.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+  selectedEquipmentSet=b.dataset.equipmentSet;updateEquipmentSetChoices();$('equipment-status').textContent='';
+ }));
+ const hint=$('equipment-set-hint');hint.hidden=!!selectedEquipmentSet;
+ hint.textContent='請選擇訂製方式。';
  updateFixedEquipmentUI();
 }
 function renderEquipmentNameOptions(){
@@ -98,7 +105,7 @@ function renderEquipmentNameOptions(){
  selectedEquipmentName='';selectedEquipmentSet='';
  $('equipment-details').placeholder='請填寫裝備等級、品質、特殊要求、希望交期或其他細節';
  updateEquipmentSetChoices();
- holder.innerHTML=(equipmentNameOptions[selectedEquipmentType]||[]).map(name=>{
+ holder.innerHTML=(equipmentNameOptions()[selectedEquipmentType]||[]).map(name=>{
   const display=config.equipmentDisplay?.[name];const parts=display?[display.name||name,display.note||'']:[name,''];
   return `<button type="button" class="equipment-name-choice" data-equipment-name="${safe(name)}" aria-pressed="false"><strong>${safe(parts[0])}</strong>${parts[1]?`<small>${safe(parts[1])}</small>`:''}</button>`;
  }).join('');
@@ -208,15 +215,17 @@ function loadManagedCatalog(){
    else removed.push(before.find(p=>p.id===id)?.name||'');
   }
   cart=next;save();
-  if(data.equipmentPrices&&typeof data.equipmentPrices==='object'){
-   for(const key of Object.keys(config.equipmentPrices||{})){
-    const v=Number(data.equipmentPrices[key]);if(Number.isSafeInteger(v)&&v>0)config.equipmentPrices[key]=v;
-   }
+  // V1.4.04：依後端提供的獨立裝備清單建立可選套裝，避免新版本仍使用舊寫死選項。
+  if(!Array.isArray(data.equipment)||!data.equipment.every(x=>x&&typeof x.id==='string'&&['戰鬥裝備','製作採集'].includes(x.type)&&typeof x.name==='string'&&typeof x.mode==='string'&&['固定售價','待報價'].includes(x.pricing))){
+   catalogFailed=true;showCatalogNotice(CATALOG_MSG.invalid);renderProducts();return;
   }
+  equipmentEntries=data.equipment.filter(x=>x.name.trim()&&x.mode.trim()).map(x=>({...x,price:Number(x.price)||0,description:String(x.description||'')}));
+  const removedEquipment=refreshEquipmentCart();
+  if(removedEquipment.length)console.warn('Angulus：已移除下架裝備訂製：'+removedEquipment.join('、'));
   catalogReady=true;catalogFailed=false;
-  const named=removed.filter(Boolean);
-  showCatalogNotice(!removed.length?'':named.length?CATALOG_MSG.removed+named.join('、')+'。':CATALOG_MSG.removedSome);
-  applyReorderFromReceipt();renderProducts();renderCart();updateFixedEquipmentUI();
+  const named=removed.concat(removedEquipment).filter(Boolean);
+  showCatalogNotice(!removed.length&&!removedEquipment.length?'':named.length?CATALOG_MSG.removed+named.join('、')+'。':CATALOG_MSG.removedSome);
+  applyReorderFromReceipt();renderProducts();renderCart();renderEquipmentNameOptions();updateFixedEquipmentUI();
  };
  node.onerror=fail;
  node.src=catalogUrl+'?action=catalog&callback='+encodeURIComponent(callback)+'&_='+Date.now();
@@ -251,12 +260,6 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
  const navCustom=$('nav-open-custom');if(navCustom)navCustom.addEventListener('click',e=>{e.preventDefault();selectCategory('客製化委託');location.hash='commission';});
  $('custom-form').addEventListener('submit',e=>{e.preventDefault();const name=$('custom-name').value.trim()||'客製化委託';const detail=$('custom-detail').value.trim();const status=$('custom-status');if(detail.length<5){status.textContent='請至少填寫 5 個字的製作需求。';status.className='custom-status error';$('custom-detail').focus();return;}custom.push({name,detail});$('custom-form').reset();status.textContent='已加入訂購申請單，可繼續填寫其他委託。';status.className='custom-status success';renderCart();});
  document.querySelectorAll('[data-equipment-type]').forEach(b=>b.addEventListener('click',()=>chooseEquipmentType(b.dataset.equipmentType)));
- $('equipment-set-options').querySelectorAll('[data-equipment-set]').forEach(b=>b.addEventListener('click',()=>{
-  if(!selectedEquipmentName||selectedEquipmentName==='其他')return;
-  selectedEquipmentSet=b.dataset.equipmentSet;
-  updateEquipmentSetChoices();
-  $('equipment-status').textContent='';
- }));
  $('equipment-fixed-minus').addEventListener('click',()=>adjustFixedEquipmentQuantity(-1));
  $('equipment-fixed-plus').addEventListener('click',()=>adjustFixedEquipmentQuantity(1));
  $('equipment-edit-type').addEventListener('click',()=>resetEquipmentFlow('type'));
@@ -274,7 +277,9 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
    status.textContent='請確認裝備名稱、訂製方式（選「其他」可略過）、1–99 的訂製數量，以及至少 5 個字的需求說明。';
    status.className='custom-status error';return;
   }
-  const setLabel=name==='其他'?'其他（依需求）':selectedEquipmentSet==='整套'?'整套（主副手＋裝備飾品十件）':selectedEquipmentSet==='宇宙工具專用'?'宇宙工具專用（金拇指副工具一個＋雀翎套裝備飾品十件）':'散件';
+  const selectedMode=equipmentChoice(selectedEquipmentType,name,selectedEquipmentSet);
+  if(name!=='其他'&&!selectedMode){status.textContent='此訂製方案已下架，請重新選擇。';status.className='custom-status error';return;}
+  const setLabel=name==='其他'?'其他（依需求）':selectedEquipmentSet+(selectedMode?.description?'（'+selectedMode.description+'）':'');
   custom.push({name:'【裝備訂製】'+name+'／'+setLabel,detail:`大類：${selectedEquipmentType}\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：${setLabel}\n數量：${qty} ${selectedEquipmentSet==='整套'?'套':'件／份'}\n${details}`,type:'裝備訂製',equipmentType:selectedEquipmentType,equipmentJob:selectedEquipmentJob.name,equipmentName:name,equipmentSet:name==='其他'?'其他':selectedEquipmentSet,quantity:qty});
   $('equipment-form').reset();selectedEquipmentName='';selectedEquipmentSet='';renderEquipmentNameOptions();status.textContent='裝備訂製已加入訂購申請單，待店主報價。';status.className='custom-status success';renderCart();
  });
