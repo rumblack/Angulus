@@ -65,7 +65,7 @@ function updateFixedEquipmentUI(){
  $('equipment-fixed-plus').disabled=qty>=99;
 }
 function adjustFixedEquipmentQuantity(delta){
- if(!catalogReady){showCatalogNotice('請先等待最新固定價格同步完成。');return;}
+ if(!catalogReady){showCatalogNotice(CATALOG_MSG.notReady);return;}
  const spec=selectedFixedEquipment();if(!spec||!Number.isInteger(delta))return;
  const idx=selectedFixedEquipmentIndex(),old=idx<0?0:Number(custom[idx].quantity||0);
  const qty=Math.max(0,Math.min(99,old+delta));if(qty===old)return;
@@ -168,31 +168,55 @@ function save(){try{localStorage.setItem(localKey,JSON.stringify(cart));}catch(e
 /** 以 Apps Script 公開唯讀 JSONP 載入商品，GitHub Pages 無須同源伺服器。
  * 只有此公開商品端點可使用 JSONP，且絕不包含訂單或客戶資料。
  */
+// V1.4.02：商品同步相關的客人提示（店主口吻）
+const CATALOG_MSG={
+ loading:'店主正在清點貨架，同步最新的商品與價格……',
+ notReady:'店主還在清點貨架，請等最新價格同步完成後再挑選。',
+ failed:'暫時聯繫不上工坊的帳房。為了不讓你以舊價格成交，店主先暫停了接單，請稍候片刻再重新整理頁面。',
+ invalid:'工坊帳簿的商品紀錄出了點狀況，店主暫停了接單。請稍後再來，或直接聯絡店主。',
+ notSet:'工坊的帳簿尚未開張，暫時無法接受委託，請直接聯絡店主。',
+ blocked:'帳房還沒核對完最新價格，委託暫時無法送出。請重新整理頁面後再試一次。',
+ removed:'店主清點貨架時發現，下列品項已暫停供應，已從你的訂購申請單取下：',
+ removedSome:'店主清點貨架時發現，你先前挑選的部分品項已暫停供應，已從訂購申請單取下。'
+};
 function loadManagedCatalog(){
  if(!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(catalogUrl)){
-  catalogFailed=true;showCatalogNotice('商品管理服務尚未設定，請聯絡店主。');return;
+  catalogFailed=true;showCatalogNotice(CATALOG_MSG.notSet);return;
  }
  const callback='angulusCatalog_'+Math.random().toString(36).slice(2)+'_'+Date.now();
  const node=document.createElement('script');let settled=false;
  const clean=()=>{clearTimeout(timer);node.remove();try{delete window[callback];}catch(e){window[callback]=undefined;}};
- const fail=()=>{if(settled)return;settled=true;clean();catalogFailed=true;showCatalogNotice('目前無法同步最新商品資料，已暫時停用一般商品下單，請稍後重新整理。');renderProducts();};
- const timer=setTimeout(fail,20000);
+ const fail=()=>{if(settled)return;settled=true;clean();catalogFailed=true;showCatalogNotice(CATALOG_MSG.failed);renderProducts();};
+ const timer=setTimeout(fail,12000);
  window[callback]=data=>{
   if(settled)return;settled=true;clean();
-  if(!data||data.ok!==true||!Array.isArray(data.products)){catalogFailed=true;showCatalogNotice('商品資料驗證失敗，請聯絡店主。');return;}
-  const valid=data.products.every(x=>x&&/^[a-z0-9][a-z0-9-]{1,79}$/.test(x.id)&&['常駐商品','少量購買'].includes(x.category)&&typeof x.name==='string'&&Number.isSafeInteger(x.price)&&x.price>0);
-  if(!valid){catalogFailed=true;showCatalogNotice('商品資料格式異常，請聯絡店主。');return;}
-  const ids=new Set();if(data.products.some(x=>{if(ids.has(x.id))return true;ids.add(x.id);return false;})){catalogFailed=true;showCatalogNotice('商品編號資料異常，請聯絡店主。');return;}
-  const prev=cart;const next={};
-  products=data.products.map(x=>({...x,pack:String(x.pack||''),desc:String(x.desc||''),badge:String(x.badge||'')}));
-  for(const product of products){const qty=Number(prev[product.id]);if(Number.isInteger(qty)&&qty>0&&qty<=99)next[product.id]=qty;}
+  if(!data||data.ok!==true||!Array.isArray(data.products)){catalogFailed=true;showCatalogNotice(CATALOG_MSG.invalid);renderProducts();return;}
+  // V1.4.02：逐筆檢查，格式有誤的商品只隱藏該筆，不讓整間店停擺
+  const ids=new Set();
+  const accepted=data.products.filter(x=>{
+   const ok=x&&/^[a-z0-9][a-z0-9-]{1,79}$/.test(x.id)&&['常駐商品','少量購買'].includes(x.category)&&typeof x.name==='string'&&x.name.trim()!==''&&Number.isSafeInteger(x.price)&&x.price>0&&!ids.has(x.id);
+   if(ok)ids.add(x.id);return ok;
+  });
+  const skipped=data.products.length-accepted.length;
+  if(skipped)console.warn(`Angulus：商品價格表有 ${skipped} 筆資料格式異常，已暫時隱藏。`);
+  if(!accepted.length){catalogFailed=true;showCatalogNotice(CATALOG_MSG.invalid);renderProducts();return;}
+  const before=products;const prev=cart;const next={};const removed=[];
+  products=accepted.map(x=>({...x,pack:String(x.pack||''),desc:String(x.desc||''),badge:String(x.badge||'')}));
+  for(const [id,value] of Object.entries(prev)){
+   const qty=Number(value);
+   if(products.some(p=>p.id===id)&&Number.isInteger(qty)&&qty>0&&qty<=99)next[id]=qty;
+   else removed.push(before.find(p=>p.id===id)?.name||'');
+  }
   cart=next;save();
   if(data.equipmentPrices&&typeof data.equipmentPrices==='object'){
    for(const key of Object.keys(config.equipmentPrices||{})){
     const v=Number(data.equipmentPrices[key]);if(Number.isSafeInteger(v)&&v>0)config.equipmentPrices[key]=v;
    }
   }
-  catalogReady=true;catalogFailed=false;showCatalogNotice('');applyReorderFromReceipt();renderProducts();renderCart();updateFixedEquipmentUI();
+  catalogReady=true;catalogFailed=false;
+  const named=removed.filter(Boolean);
+  showCatalogNotice(!removed.length?'':named.length?CATALOG_MSG.removed+named.join('、')+'。':CATALOG_MSG.removedSome);
+  applyReorderFromReceipt();renderProducts();renderCart();updateFixedEquipmentUI();
  };
  node.onerror=fail;
  node.src=catalogUrl+'?action=catalog&callback='+encodeURIComponent(callback)+'&_='+Date.now();
@@ -254,7 +278,7 @@ function setup(){// Keep document.title from HTML head, matching Open Graph prev
   custom.push({name:'【裝備訂製】'+name+'／'+setLabel,detail:`大類：${selectedEquipmentType}\n職業：${selectedEquipmentJob.name}（${selectedEquipmentJob.abbr}）\n訂製方式：${setLabel}\n數量：${qty} ${selectedEquipmentSet==='整套'?'套':'件／份'}\n${details}`,type:'裝備訂製',equipmentType:selectedEquipmentType,equipmentJob:selectedEquipmentJob.name,equipmentName:name,equipmentSet:name==='其他'?'其他':selectedEquipmentSet,quantity:qty});
   $('equipment-form').reset();selectedEquipmentName='';selectedEquipmentSet='';renderEquipmentNameOptions();status.textContent='裝備訂製已加入訂購申請單，待店主報價。';status.className='custom-status success';renderCart();
  });
- initializeCheckoutEnhancements();$('checkout-form').addEventListener('submit',submitOrder);$('checkout-form').addEventListener('input',e=>{if(e.target.matches('input,select,textarea'))clearCheckoutFieldError(e.target);});$('checkout-form').addEventListener('change',e=>{if(e.target.matches('input,select,textarea'))clearCheckoutFieldError(e.target);});initializePendingRecovery();showCatalogNotice('正在同步最新商品資料…');loadManagedCatalog();if(location.hash==='#commission')currentCategory='客製化委託';renderFilters();renderProducts();renderCart();}
+ initializeCheckoutEnhancements();$('checkout-form').addEventListener('submit',submitOrder);$('checkout-form').addEventListener('input',e=>{if(e.target.matches('input,select,textarea'))clearCheckoutFieldError(e.target);});$('checkout-form').addEventListener('change',e=>{if(e.target.matches('input,select,textarea'))clearCheckoutFieldError(e.target);});initializePendingRecovery();showCatalogNotice(CATALOG_MSG.loading);loadManagedCatalog();if(location.hash==='#commission')currentCategory='客製化委託';renderFilters();renderProducts();renderCart();}
 function categories(){return shopTabs;}
 function categoryOf(p){if(p.price===null)return '客製化委託';const c=p.shopCategory||p.category;return shopTabs.includes(c)?c:'常駐商品';}
 function selectCategory(c){if(!shopTabs.includes(c))return;currentCategory=c;renderFilters();renderProducts();}
@@ -311,7 +335,7 @@ function orderData(){
  return {shop:config.name||'Angulus',character:String(fd.get('character')||'').trim(),server:String(fd.get('server')||'').trim(),contact:String(fd.get('contact')||'').trim(),deliveryDate:String(fd.get('deliveryDate')||''),deliveryTime:String(fd.get('deliveryTime')||'').trim(),notes:String(fd.get('notes')||'').trim(),items,custom,estimated_gil:total,requires_quote:custom.some(x=>pricedCommissionSubtotal(x)===null),created_at:new Date().toISOString()};
 }
 function orderText(d){return [`【${d.shop}】訂購申請`,`角色名稱：${d.character}`,`伺服器：${d.server}`,`聯絡方式：${d.contact}`,`希望交貨：${d.deliveryDate||'未填寫'}`,`方便時段：${d.deliveryTime||'未填寫'}`,'','【固定商品】',...d.items.map(p=>`${p.name} × ${p.qty}｜${money(p.subtotal)}`),'',`委託小計：${money(d.estimated_gil)}`,...(d.requires_quote?['＊另含客製委託，總額待報價。']:[]),'','【客製委託】',...(d.custom.map((x,i)=>`${i+1}. ${x.name}\n${x.detail}`)),'','備註：'+(d.notes||'無'),'申請時間：'+d.created_at].join('\n');}
-async function submitOrderFormspree(e){e.preventDefault();if(!catalogReady){showCatalogNotice('請先等待商品資料同步成功後再送出訂單。');return;}const s=$('form-status');s.className='form-status';if(!Object.keys(cart).length&&!custom.length){s.textContent='請先選擇商品或填寫委託。';s.classList.add('error');return;}const endpoint=String(config.formEndpoint||'').trim();if(!/^https:\/\/formspree\.io\/f\/[a-zA-Z0-9]+$/.test(endpoint)){s.classList.add('error');s.textContent='店主尚未設定線上收單服務，現階段無法送出。請聯絡店主；亦可先截圖委託內容。';return;}const d=orderData();const button=$('submit-order');checkoutBusy=true;button.disabled=true;button.textContent='正在傳送委託…';try{const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:d.character,email:d.contact.includes('@')?d.contact:undefined,character:d.character,server:d.server,contact:d.contact,deliveryDate:d.deliveryDate,deliveryTime:d.deliveryTime,message:orderText(d),order_json:JSON.stringify(d)})});if(!r.ok)throw Error('伺服器未接受此委託（HTTP '+r.status+'）');s.textContent='委託已傳送！請保留聯絡資訊並等候店主回覆。';cart={};custom=[];save();renderCart();renderProducts();$('checkout-form').reset();}catch(err){s.classList.add('error');s.textContent='送單失敗：'+err.message+'。商品仍留在訂購申請單中，請稍後再試。';}finally{checkoutBusy=false;refreshCheckoutButton();}}
+async function submitOrderFormspree(e){e.preventDefault();if(!catalogReady){showCatalogNotice(CATALOG_MSG.notReady);return;}const s=$('form-status');s.className='form-status';if(!Object.keys(cart).length&&!custom.length){s.textContent='請先選擇商品或填寫委託。';s.classList.add('error');return;}const endpoint=String(config.formEndpoint||'').trim();if(!/^https:\/\/formspree\.io\/f\/[a-zA-Z0-9]+$/.test(endpoint)){s.classList.add('error');s.textContent='店主尚未設定線上收單服務，現階段無法送出。請聯絡店主；亦可先截圖委託內容。';return;}const d=orderData();const button=$('submit-order');checkoutBusy=true;button.disabled=true;button.textContent='正在傳送委託…';try{const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({name:d.character,email:d.contact.includes('@')?d.contact:undefined,character:d.character,server:d.server,contact:d.contact,deliveryDate:d.deliveryDate,deliveryTime:d.deliveryTime,message:orderText(d),order_json:JSON.stringify(d)})});if(!r.ok)throw Error('伺服器未接受此委託（HTTP '+r.status+'）');s.textContent='委託已傳送！請保留聯絡資訊並等候店主回覆。';cart={};custom=[];save();renderCart();renderProducts();$('checkout-form').reset();}catch(err){s.classList.add('error');s.textContent='送單失敗：'+err.message+'。商品仍留在訂購申請單中，請稍後再試。';}finally{checkoutBusy=false;refreshCheckoutButton();}}
 document.addEventListener('DOMContentLoaded',setup);
 
 
@@ -425,7 +449,7 @@ function finishConfirmedOrder(result){
 async function submitOrderGoogle(e){
  e.preventDefault();const status=$('form-status');status.className='form-status';
  if(googleSubmitting)return;
- if(!catalogReady){status.classList.add('error');status.textContent='尚未取得最新商品資料，請重新整理後再送出。';return;}
+ if(!catalogReady){status.classList.add('error');status.textContent=CATALOG_MSG.blocked;return;}
  if(!Object.keys(cart).length&&!custom.length){status.textContent='請先選擇商品或填寫委託。';status.classList.add('error');return;}
  const url=String(config.googleScriptUrl||'').trim();
  if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url)){
@@ -452,7 +476,7 @@ async function submitOrderGoogle(e){
 }
 function submitOrder(e){
  e.preventDefault();
- if(!catalogReady){$('form-status').className='form-status error';$('form-status').textContent='商品資料尚未同步，無法送出。請重新整理頁面後再試。';return;}
+ if(!catalogReady){$('form-status').className='form-status error';$('form-status').textContent=CATALOG_MSG.blocked;return;}
  if(!hasOrderItems()){refreshCheckoutButton();return;}
  if(!validateCheckoutFields())return;
  const dialog=$('order-confirm-dialog');
